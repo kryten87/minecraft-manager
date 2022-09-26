@@ -6,9 +6,7 @@ import { PortainerService } from './services/portainer.service';
 import Next from 'next';
 
 @Module({
-  imports: [
-    RenderModule.forRootAsync(Next({ dev: true }), { viewsDir: null }),
-  ],
+  imports: [RenderModule.forRootAsync(Next({ dev: true }), { viewsDir: null })],
   controllers: [AppController],
   providers: [AppService, PortainerService],
 })
