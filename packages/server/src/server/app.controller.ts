@@ -8,7 +8,6 @@ export class AppController {
   @Get()
   @Render('index')
   home() {
-    console.log('.... render index');
     return {};
   }
 }
