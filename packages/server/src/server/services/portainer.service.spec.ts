@@ -14,7 +14,7 @@ describe('PortainerService', () => {
   const mockConfigService = {
     get: (key: EnvironmentVariables): string => {
       switch (key) {
-        case EnvironmentVariables.PORTAINER_HOST:
+        case EnvironmentVariables.PORTAINER_URL:
           return host;
         case EnvironmentVariables.PORTAINER_USER:
           return username;
