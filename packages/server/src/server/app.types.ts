@@ -4,6 +4,11 @@ export enum EnvironmentVariables {
   PORTAINER_PASSWORD = 'PORTAINER_PASSWORD',
 }
 
+export enum PortainerStatus {
+  active = 1,
+  inactive = 2,
+}
+
 export const Symbols = Object.freeze({
   Axios: Symbol('Axios'),
 });
