@@ -51,7 +51,7 @@ describe('PortainerService', () => {
     beforeAll(() => {
       mockAxios.mockResolvedValue({
         status: 200,
-        data: { token },
+        data: { jwt: token },
       });
     });
 
