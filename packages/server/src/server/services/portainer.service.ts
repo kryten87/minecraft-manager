@@ -1,6 +1,6 @@
-import { Inject, Injectable, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EnvironmentVariables, Symbols } from '../app.types';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import axios from 'axios';
 
 @Injectable()
@@ -46,21 +46,24 @@ export class PortainerService {
 
   */
 
+  private getUrl(path: string): string {
+    const url = new URL(path, this.baseUrl);
+    return url.toString();
+  }
+
   public async getAuthToken(): Promise<void> {
-    const url = new URL('/api/auth', this.baseUrl);
     const response = await this.axiosLib({
       method: 'post',
-      url: url.toString(),
+      url: this.getUrl('/api/auth'),
       data: { username: this.username, password: this.password },
     });
-    this.token = response?.data?.token;
+    this.token = response?.data?.jwt;
   }
 
   public async listMinecraftStacks(): Promise<any[]> {
     if (!this.token) {
       await this.getAuthToken();
     }
-    const url = new URL('/api/stacks', this.baseUrl);
     let count = 0;
     let status = 0;
     let data: any;
@@ -69,26 +72,37 @@ export class PortainerService {
       if (count > 4) {
         throw new Error('unable to authenticate against portainer api');
       }
-      const response = await this.axiosLib({
-        method: 'get',
-        url: url.toString(),
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-      });
-      status = response.status;
-      data = response.data;
+      try {
+        const response = await this.axiosLib({
+          method: 'get',
+          url: this.getUrl('/api/stacks'),
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+        });
+        status = response.status;
+        data = response.data;
+      } catch (err) {
+        if (/status code 401/i.test(err.message)) {
+          status = 401;
+        } else {
+          throw err;
+        }
+      }
       if (status === 401) {
         await this.getAuthToken();
       }
     }
     // @TODO get additional information for the stacks
-    return (data || [])
-      .filter(({ Name }) => /minecraft/i.test(Name))
-      .map((stack) => ({
-        id: stack.Id,
-        name: stack.Name,
-        status: stack.Status,
-      }));
+    return (
+      (data || [])
+        // @TODO find a better way to tag these stacks
+        .filter(({ Name }) => /minecraft/i.test(Name))
+        .map((stack) => ({
+          id: stack.Id,
+          name: stack.Name,
+          status: stack.Status,
+        }))
+    );
   }
 }
