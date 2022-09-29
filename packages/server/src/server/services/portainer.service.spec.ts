@@ -1,7 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { PortainerService } from './portainer.service';
 import { ConfigService } from '@nestjs/config';
 import { EnvironmentVariables, PortainerStatus, Symbols } from '../app.types';
+import { PortainerService } from './portainer.service';
+import { Test, TestingModule } from '@nestjs/testing';
 
 describe('PortainerService', () => {
   let service: PortainerService;
