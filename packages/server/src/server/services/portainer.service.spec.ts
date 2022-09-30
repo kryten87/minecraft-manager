@@ -10,7 +10,7 @@ describe('PortainerService', () => {
   const username = 'myUser';
   const password = 'myPassword';
   const expiredToken = `expired-${Date.now()}`;
-  const token = `live-${Date.now()}`;
+  const token = `tok_${Date.now()}`;
 
   const mockConfigService = {
     get: (key: EnvironmentVariables): string => {
@@ -48,31 +48,37 @@ describe('PortainerService', () => {
   });
 
   describe('getAuthToken', () => {
-    beforeAll(() => {
-      mockAxios.mockResolvedValue({
-        status: 200,
-        data: { jwt: token },
+    describe('state = no token', () => {
+      beforeAll(() => {
+        mockAxios.mockResolvedValue({
+          status: 200,
+          data: { jwt: token },
+        });
+      });
+
+      it('should make the correct request for an auth token', async () => {
+        await service.getAuthToken();
+
+        expect(mockAxios).toBeCalledTimes(1);
+        expect(mockAxios).toBeCalledWith({
+          method: 'post',
+          url: `${baseUrl}/api/auth`,
+          data: {
+            username,
+            password,
+          },
+        });
+      });
+
+      it('should set the token value', async () => {
+        await service.getAuthToken();
+        expect(service.token).toBe(token);
       });
     });
 
-    it('should make the correct request for an auth token', async () => {
-      await service.getAuthToken();
+    describe('state = valid token', () => {});
 
-      expect(mockAxios).toBeCalledTimes(1);
-      expect(mockAxios).toBeCalledWith({
-        method: 'post',
-        url: `${baseUrl}/api/auth`,
-        data: {
-          username,
-          password,
-        },
-      });
-    });
-
-    it('should return the expected value', async () => {
-      await service.getAuthToken();
-      expect(service.token).toBe(token);
-    });
+    describe('state = expired token', () => {});
   });
 
   describe('listMinecraftStacks', () => {
