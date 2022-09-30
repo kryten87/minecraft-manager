@@ -82,21 +82,35 @@ export class PortainerService {
     }
     return this.token;
   }
+
+  public async listMinecraftStacks(): Promise<any[]> {
+    const token = await this.getAuthToken();
+    let data: any;
+
+    const response = await this.axiosLib({
+      method: 'get',
+      url: this.getUrl('/api/stacks'),
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    data = response.data;
+
     // @TODO get additional information for the stacks
-    return (
-      (data || [])
-        .filter(
-          (stack) =>
-            /minecraft/i.test(stack.Name) ||
-            (stack.Env || []).find(
-              (env) => env.name === 'PORTAINER_MINECRAFT_STACK',
-            ),
-        )
-        .map((stack) => ({
-          id: stack.Id,
-          name: stack.Name,
-          status: stack.Status,
-        }))
-    );
+    return (data || [])
+      .filter(
+        (stack) =>
+          /minecraft/i.test(stack.Name) ||
+          (stack.Env || []).find(
+            (env) => env.name === 'PORTAINER_MINECRAFT_STACK',
+          ),
+      )
+      .map((stack) => ({
+        id: stack.Id,
+        name: stack.Name,
+        status: stack.Status,
+      }));
   }
+
+  public async startStack(stackId: number): Promise<void> {}
 }
