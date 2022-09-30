@@ -49,11 +49,15 @@ describe('PortainerService', () => {
 
   describe('getAuthToken', () => {
     describe('state = no token', () => {
-      beforeAll(() => {
+      beforeEach(() => {
         mockAxios.mockResolvedValue({
           status: 200,
           data: { jwt: token },
         });
+      });
+
+      afterEach(() => {
+        mockAxios.mockClear();
       });
 
       it('should make the correct request for an auth token', async () => {
@@ -71,14 +75,78 @@ describe('PortainerService', () => {
       });
 
       it('should set the token value', async () => {
-        await service.getAuthToken();
-        expect(service.token).toBe(token);
+        const result = await service.getAuthToken();
+        expect(result).toBe(token);
       });
     });
 
-    describe('state = valid token', () => {});
+    describe('state = valid token', () => {
+      beforeEach(() => {
+        mockAxios.mockResolvedValueOnce({ status: 200, data: {} });
+      });
 
-    describe('state = expired token', () => {});
+      afterEach(() => {
+        mockAxios.mockClear();
+      });
+
+      it('should check the token & should not request a new one', async () => {
+        service.token = token;
+
+        await service.getAuthToken();
+
+        expect(mockAxios).toBeCalledTimes(1);
+        expect(mockAxios).toBeCalledWith({
+          method: 'get',
+          url: `${baseUrl}/api/motd`,
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      });
+
+      it('should not change the token value', async () => {
+        service.token = token;
+
+        const result = await service.getAuthToken();
+
+        expect(result).toBe(token);
+      });
+    });
+
+    describe('state = expired token', () => {
+      const newToken = `tok_${Math.random()}`;
+      beforeEach(() => {
+        mockAxios.mockRejectedValueOnce(new Error('status code 401'));
+        mockAxios.mockResolvedValueOnce({
+          status: 200,
+          data: { jwt: newToken },
+        });
+      });
+
+      afterEach(() => {
+        mockAxios.mockClear();
+      });
+
+      it('should check the token, request a new token, and update the token value', async () => {
+        service.token = token;
+
+        const result = await service.getAuthToken();
+
+        expect(mockAxios).toBeCalledTimes(2);
+        expect(mockAxios).toBeCalledWith({
+          method: 'get',
+          url: `${baseUrl}/api/motd`,
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        expect(mockAxios).toBeCalledWith({
+          method: 'post',
+          url: `${baseUrl}/api/auth`,
+          data: {
+            username,
+            password,
+          },
+        });
+        expect(result).toBe(newToken);
+      });
+    });
   });
 
   describe('listMinecraftStacks', () => {
@@ -90,7 +158,7 @@ describe('PortainerService', () => {
         originalFunction = service.getAuthToken;
         service.getAuthToken = jest.fn(() => {
           service.token = token;
-          return Promise.resolve();
+          return Promise.resolve(service.token);
         });
         service.token = undefined;
 
@@ -385,7 +453,7 @@ describe('PortainerService', () => {
         originalFunction = service.getAuthToken;
         service.getAuthToken = jest.fn(() => {
           service.token = token;
-          return Promise.resolve();
+          return Promise.resolve(service.token);
         });
         service.token = expiredToken;
 
