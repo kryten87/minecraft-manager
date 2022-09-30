@@ -9,7 +9,6 @@ describe('PortainerService', () => {
   const baseUrl = 'http://example.com';
   const username = 'myUser';
   const password = 'myPassword';
-  const expiredToken = `expired-${Date.now()}`;
   const token = `tok_${Date.now()}`;
 
   const mockConfigService = {

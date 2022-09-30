@@ -85,7 +85,6 @@ export class PortainerService {
 
   public async listMinecraftStacks(): Promise<any[]> {
     const token = await this.getAuthToken();
-    let data: any;
 
     const response = await this.axiosLib({
       method: 'get',
@@ -94,10 +93,9 @@ export class PortainerService {
         Authorization: `Bearer ${token}`,
       },
     });
-    data = response.data;
 
     // @TODO get additional information for the stacks
-    return (data || [])
+    return (response.data || [])
       .filter(
         (stack) =>
           /minecraft/i.test(stack.Name) ||
