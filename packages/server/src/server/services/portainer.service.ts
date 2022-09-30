@@ -51,48 +51,37 @@ export class PortainerService {
     return url.toString();
   }
 
-  public async getAuthToken(): Promise<void> {
-    const response = await this.axiosLib({
-      method: 'post',
-      url: this.getUrl('/api/auth'),
-      data: { username: this.username, password: this.password },
-    });
-    this.token = response?.data?.jwt;
-  }
-
-  public async listMinecraftStacks(): Promise<any[]> {
+  public async getAuthToken(): Promise<string | undefined> {
     if (!this.token) {
-      await this.getAuthToken();
+      const response = await this.axiosLib({
+        method: 'post',
+        url: this.getUrl('/api/auth'),
+        data: { username: this.username, password: this.password },
+      });
+      this.token = response?.data?.jwt;
+      return this.token;
     }
-    let count = 0;
-    let status = 0;
-    let data: any;
-    while (status !== 200) {
-      count++;
-      if (count > 4) {
-        throw new Error('unable to authenticate against portainer api');
+
+    let tokenIsValid = false;
+    try {
+      const response = await this.axiosLib({
+        method: 'get',
+        url: this.getUrl('/api/motd'),
+        headers: { Authorization: `Bearer ${this.token}` },
+      });
+      tokenIsValid = response.status === 200;
+      if (!tokenIsValid) {
+        this.token = response?.data?.jwt;
       }
-      try {
-        const response = await this.axiosLib({
-          method: 'get',
-          url: this.getUrl('/api/stacks'),
-          headers: {
-            Authorization: `Bearer ${this.token}`,
-          },
-        });
-        status = response.status;
-        data = response.data;
-      } catch (err) {
-        if (/status code 401/i.test(err.message)) {
-          status = 401;
-        } else {
-          throw err;
-        }
+    } catch (err) {
+      if (!/status code 401/i.test(err.message)) {
+        throw err;
       }
-      if (status === 401) {
-        await this.getAuthToken();
-      }
+      this.token = undefined;
+      return this.getAuthToken();
     }
+    return this.token;
+  }
     // @TODO get additional information for the stacks
     return (
       (data || [])
