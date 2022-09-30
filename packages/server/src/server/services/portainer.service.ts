@@ -96,8 +96,13 @@ export class PortainerService {
     // @TODO get additional information for the stacks
     return (
       (data || [])
-        // @TODO find a better way to tag these stacks
-        .filter(({ Name }) => /minecraft/i.test(Name))
+        .filter(
+          (stack) =>
+            /minecraft/i.test(stack.Name) ||
+            (stack.Env || []).find(
+              (env) => env.name === 'PORTAINER_MINECRAFT_STACK',
+            ),
+        )
         .map((stack) => ({
           id: stack.Id,
           name: stack.Name,
