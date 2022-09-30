@@ -66,7 +66,7 @@ export class PortainerService {
     try {
       const response = await this.axiosLib({
         method: 'get',
-        url: this.getUrl('/api/motd'),
+        url: this.getUrl('/api/status'),
         headers: { Authorization: `Bearer ${this.token}` },
       });
       tokenIsValid = response.status === 200;
