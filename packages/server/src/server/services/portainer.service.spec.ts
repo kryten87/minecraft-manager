@@ -296,4 +296,45 @@ describe('PortainerService', () => {
       ]);
     });
   });
+
+  describe('startStack', () => {
+    let originalFunction;
+
+    beforeEach(() => {
+      service.token = token;
+      originalFunction = service.getAuthToken;
+      service.getAuthToken = jest.fn(() => {
+        service.token = token;
+        return Promise.resolve(service.token);
+      });
+      service.token = undefined;
+
+      mockAxios.mockResolvedValue({});
+    });
+
+    afterEach(() => {
+      service.getAuthToken = originalFunction;
+    });
+
+    it('should authenticate', async () => {
+      const id = Math.floor(Math.random() * 1000 + 1);
+
+      await service.startStack(id);
+
+      expect(service.getAuthToken).toBeCalledTimes(1);
+    });
+
+    it('should make the correct request', async () => {
+      const id = Math.floor(Math.random() * 1000 + 1);
+
+      await service.startStack(id);
+
+      expect(mockAxios).toBeCalledTimes(1);
+      expect(mockAxios).toBeCalledWith({
+        method: 'post',
+        url: `${baseUrl}/api/stacks/${id}/start`,
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    });
+  });
 });
