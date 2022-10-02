@@ -89,9 +89,7 @@ export class PortainerService {
     const response = await this.axiosLib({
       method: 'get',
       url: this.getUrl('/api/stacks'),
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     // @TODO get additional information for the stacks
