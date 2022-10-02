@@ -110,5 +110,12 @@ export class PortainerService {
       }));
   }
 
-  public async startStack(stackId: number): Promise<void> {}
+  public async startStack(stackId: number): Promise<void> {
+    const token = await this.getAuthToken();
+    await this.axiosLib({
+      method: 'post',
+      url: this.getUrl(`/api/stacks/${stackId}/start`),
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
 }
