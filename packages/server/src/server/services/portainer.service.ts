@@ -1,7 +1,15 @@
 import { ConfigService } from '@nestjs/config';
-import { EnvironmentVariables, Symbols } from '../app.types';
+import {
+  defaultMinecraftConfig,
+  EnvironmentVariables,
+  MinecraftStackConfig,
+  MinecraftStackMetadata,
+  PortainerStackType,
+  Symbols,
+} from '../app.types';
 import { Inject, Injectable, Optional } from '@nestjs/common';
 import axios from 'axios';
+import { stringify } from 'yaml';
 
 @Injectable()
 export class PortainerService {
@@ -31,23 +39,14 @@ export class PortainerService {
     );
   }
 
-  /*
-  authentication
-  response=$(curl -s -d "{\"username\":\"${PORTAINER_USER}\",\"password\":\"${PORTAINER_PASSWORD}\"}" -H 'Content-Type: application/json' http://servers.thomas.home/api/auth)
-
-  list stacks
-  response=$(curl -s 'http://servers.thomas.home/api/stacks?filter=%7B%22Name%22%3A%22recipes%22%7D' -H "Authorization: Bearer $token")
-
-  start stack
-  response=$(curl -s -X POST "http://servers.thomas.home/api/stacks/$id/start" -H "Authorization: Bearer $token")
-
-  stop stack
-  response=$(curl -s -X POST "http://servers.thomas.home/api/stacks/$id/stop" -H "Authorization: Bearer $token")
-
-  */
-
-  private getUrl(path: string): string {
+  private getUrl(
+    path: string,
+    params: Record<string, string | number> = {},
+  ): string {
     const url = new URL(path, this.baseUrl);
+    Object.keys(params).forEach((key) => {
+      url.searchParams.append(key, `${params[key]}`);
+    });
     return url.toString();
   }
 
@@ -132,6 +131,100 @@ export class PortainerService {
       method: 'post',
       url: this.getUrl(`/api/stacks/${stackId}/stop`),
       headers: { Authorization: `Bearer ${token}` },
+    });
+  }
+
+  public async getEndpointId(): Promise<number> {
+    const token = await this.getAuthToken();
+    const response = await this.axiosLib({
+      method: 'get',
+      url: this.getUrl('/api/endpoints'),
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data[0].Id;
+  }
+
+  // @TODO move to utility functions
+  private camelCaseToSnakeCase(str: string): string {
+    return str
+      .split(/\.?(?=[A-Z])/)
+      .join('_')
+      .toLowerCase();
+  }
+
+  // @TODO move to utility functions
+  private objectToEnvValues(obj: Record<string, any>): Record<string, any> {
+    const res = {};
+    Object.keys(obj).forEach((key) => {
+      res[this.camelCaseToSnakeCase(key).toUpperCase()] = obj[key];
+    });
+    return res;
+  }
+
+  public async createStack(
+    stackConfiguration: Partial<MinecraftStackConfig>,
+    metadata: Partial<MinecraftStackMetadata>,
+  ): Promise<void> {
+    const stackFileContent = {
+      version: '3',
+      'x-metadata': {
+        description: metadata.description || 'my silly server', // @TODO from request
+        owner: metadata.owner || 'Evan', // @TODO from request
+      },
+      services: {
+        server: {
+          image: 'itzg/minecraft-server:latest',
+          environment: {
+            ...this.objectToEnvValues(defaultMinecraftConfig),
+            ...this.objectToEnvValues(stackConfiguration),
+            EULA: true,
+          },
+          ports: ['25565:25565'],
+          volumes: ['/etc/localtime:/etc/localtime:ro', 'mcdata:/data'],
+        },
+      },
+      volumes: {
+        mcdata: {
+          driver: 'local',
+          driver_opts: {
+            type: 'none',
+            o: 'bind',
+            device: `/home/dave/minecraft/mc-${
+              metadata.serverId || Date.now()
+            }`,
+          },
+        },
+      },
+    };
+
+    const content = stringify(stackFileContent);
+
+    const body = {
+      name: 'minecraft-test-api', // @TODO get this from config
+      stackFileContent: content, // @TODO generate this from config via YAML
+    };
+
+    const token = await this.getAuthToken();
+
+    const endpointId = await this.getEndpointId();
+
+    const url = this.getUrl(`/api/stacks`, {
+      type: PortainerStackType.compose,
+      method: 'string',
+      endpointId,
+    });
+
+    const res = await this.axiosLib({
+      method: 'post',
+      url,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      data: JSON.stringify(body),
     });
   }
 }
