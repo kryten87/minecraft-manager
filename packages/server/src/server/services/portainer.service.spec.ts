@@ -439,6 +439,7 @@ describe('PortainerService', () => {
         },
         data: JSON.stringify({
           name: 'minecraft-test-api',
+          env: [{ name: 'PORTAINER_MINECRAFT_STACK', value: '1' }],
           stackFileContent: stringify({
             version: '3',
             'x-metadata': {
@@ -526,6 +527,7 @@ describe('PortainerService', () => {
         },
         data: JSON.stringify({
           name: 'minecraft-test-api',
+          env: [{ name: 'PORTAINER_MINECRAFT_STACK', value: '1' }],
           stackFileContent: stringify({
             version: '3',
             'x-metadata': {
