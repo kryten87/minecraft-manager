@@ -1,7 +1,13 @@
 import { ConfigService } from '@nestjs/config';
-import { EnvironmentVariables, PortainerStatus, Symbols } from '../app.types';
+import {
+  EnvironmentVariables,
+  PortainerStackType,
+  PortainerStatus,
+  Symbols,
+} from '../app.types';
 import { PortainerService } from './portainer.service';
 import { Test, TestingModule } from '@nestjs/testing';
+import { stringify } from 'yaml';
 
 describe('PortainerService', () => {
   let service: PortainerService;
@@ -350,7 +356,7 @@ describe('PortainerService', () => {
       });
       service.token = undefined;
 
-      mockAxios.mockResolvedValue({});
+      mockAxios.mockResolvedValueOnce({});
     });
 
     afterEach(() => {
@@ -375,6 +381,201 @@ describe('PortainerService', () => {
         method: 'post',
         url: `${baseUrl}/api/stacks/${id}/stop`,
         headers: { Authorization: `Bearer ${token}` },
+      });
+    });
+  });
+
+  describe('createStack', () => {
+    let originalFunction;
+    const endpointId = Math.floor(Math.random() * 100 + 1);
+
+    beforeEach(() => {
+      service.token = token;
+      originalFunction = service.getAuthToken;
+      service.getAuthToken = jest.fn(() => {
+        service.token = token;
+        return Promise.resolve(service.token);
+      });
+      service.token = undefined;
+
+      mockAxios.mockResolvedValueOnce({
+        data: [{ Id: endpointId }],
+      });
+      mockAxios.mockResolvedValue({});
+    });
+
+    afterEach(() => {
+      service.getAuthToken = originalFunction;
+    });
+
+    it('should authenticate', async () => {
+      const id = Math.floor(Math.random() * 1000 + 1);
+
+      await service.stopStack(id);
+
+      expect(service.getAuthToken).toBeCalledTimes(1);
+    });
+
+    it.todo('should get all minecraft stacks and stop any running ones');
+
+    it('should make the correct request (no args -> default values)', async () => {
+      await service.createStack({}, { serverId: 42 });
+
+      expect(mockAxios).toBeCalledTimes(2);
+      expect(mockAxios).toBeCalledWith({
+        method: 'get',
+        url: `${baseUrl}/api/endpoints`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      expect(mockAxios).toBeCalledWith({
+        method: 'post',
+        url: `${baseUrl}/api/stacks?type=${PortainerStackType.compose}&method=string&endpointId=${endpointId}`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        data: JSON.stringify({
+          name: 'minecraft-test-api',
+          stackFileContent: stringify({
+            version: '3',
+            'x-metadata': {
+              description: 'my silly server',
+              owner: 'Evan',
+            },
+            services: {
+              server: {
+                image: 'itzg/minecraft-server:latest',
+                environment: {
+                  WHITELIST: 'Kryten,MWThomas,EMThomas',
+                  OPS: 'Kryten,MWThomas,EMThomas',
+                  ICON: 'http://findicons.com/files/icons/2438/minecraft/256/minecraft.png',
+                  ALLOW_NETHER: true,
+                  ANNOUNCE_PLAYER_ACHIEVEMENTS: true,
+                  ENABLE_COMMAND_BLOCK: true,
+                  GENERATE_STRUCTURES: true,
+                  HARDCODE: false,
+                  SNOOPER_ENABLED: false,
+                  MAX_BUILD_HEIGHT: 256,
+                  MAX_TICK_TIME: 60000,
+                  SPAWN_ANIMALS: true,
+                  SPAWN_MONSTERS: true,
+                  SPAWN_NPCS: true,
+                  SPAWN_PROTECTION: 0,
+                  VIEW_DISTANCE: 10,
+                  GAME_MODE: 'survival',
+                  PVP: false,
+                  LEVEL_TYPE: 'minecraft:normal',
+                  ONLINE_MODE: true,
+                  ALLOW_FLIGHT: true,
+                  DIFFICULTY: 2,
+                  EULA: true,
+                },
+                ports: ['25565:25565'],
+                volumes: ['/etc/localtime:/etc/localtime:ro', 'mcdata:/data'],
+              },
+            },
+            volumes: {
+              mcdata: {
+                driver: 'local',
+                driver_opts: {
+                  type: 'none',
+                  o: 'bind',
+                  device: '/home/dave/minecraft/mc-42',
+                },
+              },
+            },
+          }),
+        }),
+      });
+    });
+
+    it('should make the correct request (some args provided)', async () => {
+      await service.createStack(
+        {
+          icon: 'http://findicons.com/files/icons/2438/minecraft/256/minecraft.png',
+          allowNether: false,
+          maxBuildHeight: 1024,
+          spawnAnimals: false,
+          pvp: true,
+        },
+        {
+          description: 'something weird',
+          owner: 'Nobody',
+          serverId: 99,
+        },
+      );
+
+      expect(mockAxios).toBeCalledTimes(2);
+      expect(mockAxios).toBeCalledWith({
+        method: 'get',
+        url: `${baseUrl}/api/endpoints`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      expect(mockAxios).toBeCalledWith({
+        method: 'post',
+        url: `${baseUrl}/api/stacks?type=${PortainerStackType.compose}&method=string&endpointId=${endpointId}`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        data: JSON.stringify({
+          name: 'minecraft-test-api',
+          stackFileContent: stringify({
+            version: '3',
+            'x-metadata': {
+              description: 'something weird',
+              owner: 'Nobody',
+            },
+            services: {
+              server: {
+                image: 'itzg/minecraft-server:latest',
+                environment: {
+                  WHITELIST: 'Kryten,MWThomas,EMThomas',
+                  OPS: 'Kryten,MWThomas,EMThomas',
+                  ICON: 'http://findicons.com/files/icons/2438/minecraft/256/minecraft.png',
+                  ALLOW_NETHER: false,
+                  ANNOUNCE_PLAYER_ACHIEVEMENTS: true,
+                  ENABLE_COMMAND_BLOCK: true,
+                  GENERATE_STRUCTURES: true,
+                  HARDCODE: false,
+                  SNOOPER_ENABLED: false,
+                  MAX_BUILD_HEIGHT: 1024,
+                  MAX_TICK_TIME: 60000,
+                  SPAWN_ANIMALS: false,
+                  SPAWN_MONSTERS: true,
+                  SPAWN_NPCS: true,
+                  SPAWN_PROTECTION: 0,
+                  VIEW_DISTANCE: 10,
+                  GAME_MODE: 'survival',
+                  PVP: true,
+                  LEVEL_TYPE: 'minecraft:normal',
+                  ONLINE_MODE: true,
+                  ALLOW_FLIGHT: true,
+                  DIFFICULTY: 2,
+                  EULA: true,
+                },
+                ports: ['25565:25565'],
+                volumes: ['/etc/localtime:/etc/localtime:ro', 'mcdata:/data'],
+              },
+            },
+            volumes: {
+              mcdata: {
+                driver: 'local',
+                driver_opts: {
+                  type: 'none',
+                  o: 'bind',
+                  device: '/home/dave/minecraft/mc-99',
+                },
+              },
+            },
+          }),
+        }),
       });
     });
   });
