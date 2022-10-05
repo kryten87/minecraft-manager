@@ -28,6 +28,19 @@ export enum MinecraftLevelType {
   single_biome_surface = 'minecraft:single_biome_surface',
 }
 
+export enum MinecraftDifficulty {
+  peaceful = 0,
+  easy = 1,
+  normal = 2,
+  hard = 3,
+}
+
+export interface MinecraftStackMetadata {
+  description: string;
+  owner: string;
+  serverId: number;
+}
+
 export interface MinecraftStackConfig {
   motd: string; // message of the day
   whitelist: string; // CSV list of allowed players (Kryten,MWThomas,EMThomas)
@@ -43,7 +56,7 @@ export interface MinecraftStackConfig {
   maxTickTime: number; // max tick time before killing server (60000 ms)
   spawnAnimals: boolean; // (true)
   spawnMonsters: boolean; // (true)
-  spawnNPCs: boolean; // spawn villagers (true)
+  spawnNpcs: boolean; // spawn villagers (true)
   spawnProtection: number; // set the area that non-ops can not edit (0 to disable) @TODO research this
   viewDistance: number; // set the amount of world data the server sends, in chunks (10)
   seed: string; // the level seed value (undefined)
@@ -72,7 +85,7 @@ export const defaultMinecraftConfig: Partial<MinecraftStackConfig> =
     maxTickTime: 60000,
     spawnAnimals: true,
     spawnMonsters: true,
-    spawnNPCs: true,
+    spawnNpcs: true,
     spawnProtection: 0,
     viewDistance: 10,
     gameMode: MinecraftGameMode.survival,
@@ -80,4 +93,10 @@ export const defaultMinecraftConfig: Partial<MinecraftStackConfig> =
     levelType: MinecraftLevelType.normal,
     onlineMode: true,
     allowFlight: true,
+    difficulty: MinecraftDifficulty.normal,
   });
+
+export enum PortainerStackType {
+  swarm = 1,
+  compose = 2,
+}
