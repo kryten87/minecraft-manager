@@ -12,6 +12,9 @@ export class AppController {
   @Get()
   @Render('index')
   async home() {
+    // console.log('.... create');
+    // await this.portainerService.createStack({}, { serverId: 99 });
+    // console.log('.... create finished');
     return {
       containers: await this.portainerService.listMinecraftStacks(),
     };
