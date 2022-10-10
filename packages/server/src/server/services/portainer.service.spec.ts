@@ -466,6 +466,8 @@ describe('PortainerService', () => {
     let originalAuthFunction;
     let originalEndpointFunction;
     let originalVolumeFunction;
+    let originalListFunction;
+    let originalStopFunction;
 
     const endpointId = Math.floor(Math.random() * 100 + 1);
 
@@ -484,6 +486,18 @@ describe('PortainerService', () => {
       originalVolumeFunction = service.createVolume;
       service.createVolume = jest.fn(() => Promise.resolve());
 
+      originalListFunction = service.listMinecraftStacks;
+      service.listMinecraftStacks = jest.fn(() =>
+        Promise.resolve([
+          { id: 40, name: 'mctest40', status: PortainerStatus.inactive },
+          { id: 42, name: 'mctest42', status: PortainerStatus.active },
+          { id: 44, name: 'mctest44', status: PortainerStatus.inactive },
+        ]),
+      );
+
+      originalStopFunction = service.stopStack;
+      service.stopStack = jest.fn(() => Promise.resolve());
+
       mockAxios.mockResolvedValueOnce({
         data: [{ Id: endpointId }],
       });
@@ -494,6 +508,8 @@ describe('PortainerService', () => {
       service.getAuthToken = originalAuthFunction;
       service.getEndpointId = originalEndpointFunction;
       service.createVolume = originalVolumeFunction;
+      service.listMinecraftStacks = originalListFunction;
+      service.stopStack = originalStopFunction;
     });
 
     it('should authenticate', async () => {
@@ -508,7 +524,15 @@ describe('PortainerService', () => {
       expect(service.getEndpointId).toBeCalledTimes(1);
     });
 
-    it.todo('should get all minecraft stacks and stop any running ones');
+    it('should get all minecraft stacks and stop any running ones', async () => {
+      const name = `server-${Date.now()}`;
+      await service.createStack({}, { name });
+
+      expect(service.listMinecraftStacks).toBeCalledTimes(1);
+
+      expect(service.stopStack).toBeCalledTimes(1);
+      expect(service.stopStack).toBeCalledWith(42);
+    });
 
     it('should make the correct request (no args -> default values)', async () => {
       const name = `server-${Date.now()}`;
