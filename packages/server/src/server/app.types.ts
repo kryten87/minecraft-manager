@@ -37,6 +37,7 @@ export enum MinecraftDifficulty {
 }
 
 export interface MinecraftStackMetadata {
+  name: string;
   description: string;
   owner: string;
   serverId: number;
