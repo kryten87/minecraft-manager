@@ -508,13 +508,6 @@ describe('PortainerService', () => {
       expect(service.getEndpointId).toBeCalledTimes(1);
     });
 
-    it('should create a volume', async () => {
-      const name = `server-${Date.now()}`;
-      await service.createStack({}, { name });
-      expect(service.createVolume).toBeCalledTimes(1);
-      expect(service.createVolume).toBeCalledWith(name, name);
-    });
-
     it.todo('should get all minecraft stacks and stop any running ones');
 
     it('should make the correct request (no args -> default values)', async () => {
@@ -568,11 +561,11 @@ describe('PortainerService', () => {
                   EULA: true,
                 },
                 ports: ['25565:25565'],
-                volumes: ['/etc/localtime:/etc/localtime:ro', name],
+                volumes: [
+                  '/etc/localtime:/etc/localtime:ro',
+                  `${resolve(volumePath, name)}:/data`,
+                ],
               },
-            },
-            volumes: {
-              [`${name}`]: { external: true },
             },
           }),
         }),
@@ -643,11 +636,11 @@ describe('PortainerService', () => {
                   EULA: true,
                 },
                 ports: ['25565:25565'],
-                volumes: ['/etc/localtime:/etc/localtime:ro', name],
+                volumes: [
+                  '/etc/localtime:/etc/localtime:ro',
+                  `${resolve(volumePath, name)}:/data`,
+                ],
               },
-            },
-            volumes: {
-              [name]: { external: true },
             },
           }),
         }),
