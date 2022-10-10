@@ -198,11 +198,11 @@ export class PortainerService {
   ): Promise<void> {
     const token = await this.getAuthToken();
     const endpointId = await this.getEndpointId();
+
     // @TODO get a better name for the volume (ie. make sure it's valid)
     const name = metadata?.name || `server-${Date.now()}`;
     // @TODO build a path from the name
     const path = name;
-    await this.createVolume(name, path);
 
     const stackFileContent = {
       version: '3',
@@ -220,11 +220,16 @@ export class PortainerService {
             EULA: true,
           },
           ports: ['25565:25565'],
-          volumes: ['/etc/localtime:/etc/localtime:ro', name],
+          volumes: [
+            '/etc/localtime:/etc/localtime:ro',
+            `${resolve(
+              this.configService.get<string>(
+                EnvironmentVariables.PORTAINER_VOLUME_PATH,
+              ),
+              path,
+            )}:/data`,
+          ],
         },
-      },
-      volumes: {
-        [`${name}`]: { external: true },
       },
     };
 
@@ -242,7 +247,7 @@ export class PortainerService {
       endpointId,
     });
 
-    const res = await this.axiosLib({
+    await this.axiosLib({
       method: 'post',
       url,
       headers: {
