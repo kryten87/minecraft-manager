@@ -8,6 +8,7 @@ import {
 import { PortainerService } from './portainer.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { stringify } from 'yaml';
+import { resolve } from 'path';
 
 describe('PortainerService', () => {
   let service: PortainerService;
@@ -16,6 +17,7 @@ describe('PortainerService', () => {
   const username = 'myUser';
   const password = 'myPassword';
   const token = `tok_${Date.now()}`;
+  const volumePath = '/some/path';
 
   const mockConfigService = {
     get: (key: EnvironmentVariables): string => {
@@ -26,6 +28,8 @@ describe('PortainerService', () => {
           return username;
         case EnvironmentVariables.PORTAINER_PASSWORD:
           return password;
+        case EnvironmentVariables.PORTAINER_VOLUME_PATH:
+          return volumePath;
         default:
           throw new Error(`unrecognized config key ${key}`);
       }
@@ -381,6 +385,79 @@ describe('PortainerService', () => {
         method: 'post',
         url: `${baseUrl}/api/stacks/${id}/stop`,
         headers: { Authorization: `Bearer ${token}` },
+      });
+    });
+  });
+
+  describe('createVolume', () => {
+    let originalAuthFunction;
+    let originalEndpointFunction;
+
+    const endpointId = Math.floor(Math.random() * 1000 + 1);
+
+    beforeEach(() => {
+      service.token = token;
+      originalAuthFunction = service.getAuthToken;
+      service.getAuthToken = jest.fn(() => {
+        service.token = token;
+        return Promise.resolve(service.token);
+      });
+      service.token = undefined;
+
+      originalEndpointFunction = service.getEndpointId;
+      service.getEndpointId = jest.fn(() => {
+        return Promise.resolve(endpointId);
+      });
+
+      mockAxios.mockResolvedValue({});
+    });
+
+    afterEach(() => {
+      service.getAuthToken = originalAuthFunction;
+      service.getEndpointId = originalEndpointFunction;
+    });
+
+    it('should authenticate', async () => {
+      const name = 'my-volume';
+      const path = '/my/fake/path';
+
+      await service.createVolume(name, path);
+
+      expect(service.getAuthToken).toBeCalledTimes(1);
+    });
+
+    it('should get the endpoint ID', async () => {
+      const name = 'my-volume';
+      const path = '/my/fake/path';
+
+      await service.createVolume(name, path);
+
+      expect(service.getEndpointId).toBeCalledTimes(1);
+    });
+
+    it('should make the correct request', async () => {
+      const name = 'my-other-volume';
+      const path = '/my/other/fake/path';
+
+      await service.createVolume(name, path);
+
+      expect(mockAxios).toBeCalledTimes(1);
+      expect(mockAxios).toBeCalledWith({
+        method: 'post',
+        url: `${baseUrl}/api/endpoints/${endpointId}/docker/volumes/create`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        data: JSON.stringify({
+          Name: name,
+          Driver: 'local',
+          DriverOpts: {
+            type: 'none',
+            o: 'bind',
+            device: resolve(volumePath, path),
+          },
+        }),
       });
     });
   });
