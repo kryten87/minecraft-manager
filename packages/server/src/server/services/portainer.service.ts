@@ -196,9 +196,18 @@ export class PortainerService {
     stackConfiguration: Partial<MinecraftStackConfig>,
     metadata: Partial<MinecraftStackMetadata>,
   ): Promise<void> {
+    const token = await this.getAuthToken();
+    const endpointId = await this.getEndpointId();
+    // @TODO get a better name for the volume (ie. make sure it's valid)
+    const name = metadata?.name || `server-${Date.now()}`;
+    // @TODO build a path from the name
+    const path = name;
+    await this.createVolume(name, path);
+
     const stackFileContent = {
       version: '3',
       'x-metadata': {
+        name,
         description: metadata.description || 'my silly server', // @TODO from request
         owner: metadata.owner || 'Evan', // @TODO from request
       },
@@ -211,34 +220,21 @@ export class PortainerService {
             EULA: true,
           },
           ports: ['25565:25565'],
-          volumes: ['/etc/localtime:/etc/localtime:ro', 'mcdata:/data'],
+          volumes: ['/etc/localtime:/etc/localtime:ro', name],
         },
       },
       volumes: {
-        mcdata: {
-          driver: 'local',
-          driver_opts: {
-            type: 'none',
-            o: 'bind',
-            device: `/home/dave/minecraft/mc-${
-              metadata.serverId || Date.now()
-            }`,
-          },
-        },
+        [`${name}`]: { external: true },
       },
     };
 
     const content = stringify(stackFileContent);
 
     const body = {
-      name: 'minecraft-test-api', // @TODO get this from config
+      name, // @TODO get this from config
       env: [{ name: 'PORTAINER_MINECRAFT_STACK', value: '1' }], // a flag to indicate this is a minecraft stack
       stackFileContent: content, // @TODO generate this from config via YAML
     };
-
-    const token = await this.getAuthToken();
-
-    const endpointId = await this.getEndpointId();
 
     const url = this.getUrl(`/api/stacks`, {
       type: PortainerStackType.compose,
