@@ -233,7 +233,7 @@ export class PortainerService {
     const body = {
       name, // @TODO get this from config
       env: [{ name: 'PORTAINER_MINECRAFT_STACK', value: '1' }], // a flag to indicate this is a minecraft stack
-      stackFileContent: content, // @TODO generate this from config via YAML
+      stackFileContent: content,
     };
 
     const url = this.getUrl(`/api/stacks`, {
