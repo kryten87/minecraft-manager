@@ -5,6 +5,7 @@ import {
   MinecraftStackConfig,
   MinecraftStackMetadata,
   PortainerStackType,
+  PortainerStatus,
   Symbols,
 } from '../app.types';
 import { Inject, Injectable, Optional } from '@nestjs/common';
@@ -84,6 +85,7 @@ export class PortainerService {
   }
 
   public async listMinecraftStacks(): Promise<any[]> {
+    // @TODO add name, description from docker-compose.yml metadata
     const token = await this.getAuthToken();
 
     const response = await this.axiosLib({
@@ -198,6 +200,16 @@ export class PortainerService {
   ): Promise<void> {
     const token = await this.getAuthToken();
     const endpointId = await this.getEndpointId();
+
+    // get minecraft stacks & stop any running ones
+    const stacks = await this.listMinecraftStacks();
+    await Promise.all(
+      stacks.map((stack) =>
+        stack.status === PortainerStatus.active
+          ? this.stopStack(stack.id)
+          : null,
+      ),
+    );
 
     // @TODO get a better name for the volume (ie. make sure it's valid)
     const name = metadata?.name || `server-${Date.now()}`;
