@@ -463,17 +463,26 @@ describe('PortainerService', () => {
   });
 
   describe('createStack', () => {
-    let originalFunction;
+    let originalAuthFunction;
+    let originalEndpointFunction;
+    let originalVolumeFunction;
+
     const endpointId = Math.floor(Math.random() * 100 + 1);
 
     beforeEach(() => {
       service.token = token;
-      originalFunction = service.getAuthToken;
+      originalAuthFunction = service.getAuthToken;
       service.getAuthToken = jest.fn(() => {
         service.token = token;
         return Promise.resolve(service.token);
       });
       service.token = undefined;
+
+      originalEndpointFunction = service.getEndpointId;
+      service.getEndpointId = jest.fn(() => Promise.resolve(endpointId));
+
+      originalVolumeFunction = service.createVolume;
+      service.createVolume = jest.fn(() => Promise.resolve());
 
       mockAxios.mockResolvedValueOnce({
         data: [{ Id: endpointId }],
@@ -482,31 +491,37 @@ describe('PortainerService', () => {
     });
 
     afterEach(() => {
-      service.getAuthToken = originalFunction;
+      service.getAuthToken = originalAuthFunction;
+      service.getEndpointId = originalEndpointFunction;
+      service.createVolume = originalVolumeFunction;
     });
 
     it('should authenticate', async () => {
-      const id = Math.floor(Math.random() * 1000 + 1);
-
-      await service.stopStack(id);
-
+      const name = `server-${Date.now()}`;
+      await service.createStack({}, { name });
       expect(service.getAuthToken).toBeCalledTimes(1);
+    });
+
+    it('should get the endpoint ID', async () => {
+      const name = `server-${Date.now()}`;
+      await service.createStack({}, { name });
+      expect(service.getEndpointId).toBeCalledTimes(1);
+    });
+
+    it('should create a volume', async () => {
+      const name = `server-${Date.now()}`;
+      await service.createStack({}, { name });
+      expect(service.createVolume).toBeCalledTimes(1);
+      expect(service.createVolume).toBeCalledWith(name, name);
     });
 
     it.todo('should get all minecraft stacks and stop any running ones');
 
     it('should make the correct request (no args -> default values)', async () => {
-      await service.createStack({}, { serverId: 42 });
+      const name = `server-${Date.now()}`;
+      await service.createStack({}, { name });
 
-      expect(mockAxios).toBeCalledTimes(2);
-      expect(mockAxios).toBeCalledWith({
-        method: 'get',
-        url: `${baseUrl}/api/endpoints`,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      expect(mockAxios).toBeCalledTimes(1);
       expect(mockAxios).toBeCalledWith({
         method: 'post',
         url: `${baseUrl}/api/stacks?type=${PortainerStackType.compose}&method=string&endpointId=${endpointId}`,
@@ -515,11 +530,12 @@ describe('PortainerService', () => {
           'Content-Type': 'application/json',
         },
         data: JSON.stringify({
-          name: 'minecraft-test-api',
+          name,
           env: [{ name: 'PORTAINER_MINECRAFT_STACK', value: '1' }],
           stackFileContent: stringify({
             version: '3',
             'x-metadata': {
+              name,
               description: 'my silly server',
               owner: 'Evan',
             },
@@ -552,18 +568,11 @@ describe('PortainerService', () => {
                   EULA: true,
                 },
                 ports: ['25565:25565'],
-                volumes: ['/etc/localtime:/etc/localtime:ro', 'mcdata:/data'],
+                volumes: ['/etc/localtime:/etc/localtime:ro', name],
               },
             },
             volumes: {
-              mcdata: {
-                driver: 'local',
-                driver_opts: {
-                  type: 'none',
-                  o: 'bind',
-                  device: '/home/dave/minecraft/mc-42',
-                },
-              },
+              [`${name}`]: { external: true },
             },
           }),
         }),
@@ -571,6 +580,7 @@ describe('PortainerService', () => {
     });
 
     it('should make the correct request (some args provided)', async () => {
+      const name = `server-${Date.now()}`;
       await service.createStack(
         {
           icon: 'http://findicons.com/files/icons/2438/minecraft/256/minecraft.png',
@@ -580,21 +590,13 @@ describe('PortainerService', () => {
           pvp: true,
         },
         {
+          name,
           description: 'something weird',
           owner: 'Nobody',
-          serverId: 99,
         },
       );
 
-      expect(mockAxios).toBeCalledTimes(2);
-      expect(mockAxios).toBeCalledWith({
-        method: 'get',
-        url: `${baseUrl}/api/endpoints`,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      expect(mockAxios).toBeCalledTimes(1);
       expect(mockAxios).toBeCalledWith({
         method: 'post',
         url: `${baseUrl}/api/stacks?type=${PortainerStackType.compose}&method=string&endpointId=${endpointId}`,
@@ -603,11 +605,12 @@ describe('PortainerService', () => {
           'Content-Type': 'application/json',
         },
         data: JSON.stringify({
-          name: 'minecraft-test-api',
+          name,
           env: [{ name: 'PORTAINER_MINECRAFT_STACK', value: '1' }],
           stackFileContent: stringify({
             version: '3',
             'x-metadata': {
+              name,
               description: 'something weird',
               owner: 'Nobody',
             },
@@ -640,18 +643,11 @@ describe('PortainerService', () => {
                   EULA: true,
                 },
                 ports: ['25565:25565'],
-                volumes: ['/etc/localtime:/etc/localtime:ro', 'mcdata:/data'],
+                volumes: ['/etc/localtime:/etc/localtime:ro', name],
               },
             },
             volumes: {
-              mcdata: {
-                driver: 'local',
-                driver_opts: {
-                  type: 'none',
-                  o: 'bind',
-                  device: '/home/dave/minecraft/mc-99',
-                },
-              },
+              [name]: { external: true },
             },
           }),
         }),
