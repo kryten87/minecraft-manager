@@ -10,6 +10,7 @@ import {
 import { Inject, Injectable, Optional } from '@nestjs/common';
 import axios from 'axios';
 import { stringify } from 'yaml';
+import { resolve } from 'path';
 
 @Injectable()
 export class PortainerService {
@@ -145,6 +146,33 @@ export class PortainerService {
       },
     });
     return response.data[0].Id;
+  }
+
+  public async createVolume(name: string, dirName: string): Promise<void> {
+    const token = await this.getAuthToken();
+    const endpointId = await this.getEndpointId();
+    await this.axiosLib({
+      method: 'post',
+      url: this.getUrl(`/api/endpoints/${endpointId}/docker/volumes/create`),
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      data: JSON.stringify({
+        Name: name,
+        Driver: 'local',
+        DriverOpts: {
+          type: 'none',
+          o: 'bind',
+          device: resolve(
+            this.configService.get<string>(
+              EnvironmentVariables.PORTAINER_VOLUME_PATH,
+            ),
+            dirName,
+          ),
+        },
+      }),
+    });
   }
 
   // @TODO move to utility functions
