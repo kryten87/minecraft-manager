@@ -40,7 +40,6 @@ export interface MinecraftStackMetadata {
   name: string;
   description: string;
   owner: string;
-  serverId: number;
 }
 
 export interface MinecraftStackConfig {
