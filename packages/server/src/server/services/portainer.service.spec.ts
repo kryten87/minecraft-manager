@@ -162,6 +162,73 @@ describe('PortainerService', () => {
     });
   });
 
+  describe('getStackMetadata', () => {
+    let originalFunction;
+
+    const name = 'my-special-stack';
+    const description = 'A detailed description';
+    const owner = 'Nobody';
+
+    beforeEach(() => {
+      // @ts-ignore private property; ok for testing
+      service.token = token;
+      originalFunction = service.getAuthToken;
+      service.getAuthToken = jest.fn(() => {
+        // @ts-ignore private property; ok for testing
+        service.token = token;
+        // @ts-ignore private property; ok for testing
+        return Promise.resolve(service.token);
+      });
+      // @ts-ignore private property; ok for testing
+      service.token = undefined;
+
+      mockAxios.mockResolvedValue({
+        status: 200,
+        data: {
+          StackFileContent: stringify({
+            version: '3',
+            'x-metadata': { name, description, owner },
+            services: {},
+          }),
+        },
+      });
+    });
+
+    afterEach(() => {
+      service.getAuthToken = originalFunction;
+    });
+    it('should authenticate', async () => {
+      const id = 1;
+
+      await service.getStackMetadata(id);
+
+      expect(service.getAuthToken).toBeCalledTimes(1);
+    });
+
+    it('should make the correct request', async () => {
+      const id = 1;
+
+      await service.getStackMetadata(id);
+
+      expect(mockAxios).toBeCalledTimes(1);
+      expect(mockAxios).toBeCalledWith({
+        method: 'get',
+        url: `${baseUrl}/api/stacks/${id}/file`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    });
+
+    it('should return the expected values', async () => {
+      const id = 1;
+
+      const result = await service.getStackMetadata(id);
+
+      expect(result).toEqual({ name, description, owner });
+    });
+  });
+
   describe('listMinecraftStacks', () => {
     let originalFunction;
 
