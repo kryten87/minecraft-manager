@@ -104,7 +104,6 @@ export class PortainerService {
 
   // @TYPES remove this any
   public async listMinecraftStacks(): Promise<any[]> {
-    // @TODO add name, description from docker-compose.yml metadata
     const token = await this.getAuthToken();
 
     const response = await this.axiosLib({
