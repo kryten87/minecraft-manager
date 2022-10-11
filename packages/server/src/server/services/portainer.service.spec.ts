@@ -231,6 +231,11 @@ describe('PortainerService', () => {
 
   describe('listMinecraftStacks', () => {
     let originalAuthFunction;
+    let originalMetadataFunction;
+
+    const name = 'My MC Server';
+    const description = 'Something amazing!';
+    const owner = 'Nobody';
 
     beforeEach(() => {
       // @ts-ignore private property; ok for testing
@@ -244,6 +249,11 @@ describe('PortainerService', () => {
       });
       // @ts-ignore private property; ok for testing
       service.token = undefined;
+
+      originalMetadataFunction = service.getStackMetadata;
+      service.getStackMetadata = jest.fn(() =>
+        Promise.resolve({ name, description, owner }),
+      );
 
       mockAxios.mockResolvedValue({
         status: 200,
@@ -321,7 +331,7 @@ describe('PortainerService', () => {
             EndpointId: 2,
             SwarmId: '',
             EntryPoint: 'docker-compose.yml',
-            Env: [],
+            Env: [{ name: 'PORTAINER_MINECRAFT_STACK', value: 1 }],
             ResourceControl: {
               Id: 3,
               ResourceId: '2_minecraft-test',
@@ -353,12 +363,20 @@ describe('PortainerService', () => {
 
     afterEach(() => {
       service.getAuthToken = originalAuthFunction;
+      service.getStackMetadata = originalMetadataFunction;
     });
 
     it('should authenticate', async () => {
       await service.listMinecraftStacks();
 
       expect(service.getAuthToken).toBeCalledTimes(1);
+    });
+
+    it('should get the stack metadata', async () => {
+      await service.listMinecraftStacks();
+
+      expect(service.getStackMetadata).toBeCalledTimes(1);
+      expect(service.getStackMetadata).toBeCalledWith(4);
     });
 
     it('should make the correct request', async () => {
@@ -377,7 +395,14 @@ describe('PortainerService', () => {
     it('should return the expected values', async () => {
       const result = await service.listMinecraftStacks();
       expect(result).toEqual([
-        { id: 4, name: 'minecraft-test', status: PortainerStatus.inactive },
+        {
+          id: 4,
+          stackName: 'minecraft-test',
+          status: PortainerStatus.inactive,
+          name,
+          description,
+          owner,
+        },
       ]);
     });
   });
