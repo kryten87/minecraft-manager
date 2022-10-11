@@ -8,7 +8,13 @@ import {
   PortainerStatus,
   Symbols,
 } from '../app.types';
-import { Inject, Injectable, Optional } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Optional,
+} from '@nestjs/common';
 import axios from 'axios';
 import { stringify } from 'yaml';
 import { resolve } from 'path';
@@ -194,8 +200,13 @@ export class PortainerService {
     );
 
     if (!metadata.name) {
-      // @TODO throw a 400 Bad Request error
-      throw new Error('name must be provided');
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'The stack name must be provided',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
     const name = createStackName(metadata.name);
     const path = resolve(
