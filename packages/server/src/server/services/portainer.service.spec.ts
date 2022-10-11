@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { ConfigService } from '@nestjs/config';
 import {
   EnvironmentVariables,
@@ -99,6 +100,7 @@ describe('PortainerService', () => {
       });
 
       it('should check the token & should not request a new one', async () => {
+        // @ts-ignore private property; ok for testing
         service.token = token;
 
         await service.getAuthToken();
@@ -112,6 +114,7 @@ describe('PortainerService', () => {
       });
 
       it('should not change the token value', async () => {
+        // @ts-ignore private property; ok for testing
         service.token = token;
 
         const result = await service.getAuthToken();
@@ -135,6 +138,7 @@ describe('PortainerService', () => {
       });
 
       it('should check the token, request a new token, and update the token value', async () => {
+        // @ts-ignore private property; ok for testing
         service.token = token;
 
         const result = await service.getAuthToken();
@@ -162,12 +166,16 @@ describe('PortainerService', () => {
     let originalFunction;
 
     beforeEach(() => {
+      // @ts-ignore private property; ok for testing
       service.token = token;
       originalFunction = service.getAuthToken;
       service.getAuthToken = jest.fn(() => {
+        // @ts-ignore private property; ok for testing
         service.token = token;
+        // @ts-ignore private property; ok for testing
         return Promise.resolve(service.token);
       });
+      // @ts-ignore private property; ok for testing
       service.token = undefined;
 
       mockAxios.mockResolvedValue({
@@ -311,12 +319,16 @@ describe('PortainerService', () => {
     let originalFunction;
 
     beforeEach(() => {
+      // @ts-ignore private property; ok for testing
       service.token = token;
       originalFunction = service.getAuthToken;
       service.getAuthToken = jest.fn(() => {
+        // @ts-ignore private property; ok for testing
         service.token = token;
+        // @ts-ignore private property; ok for testing
         return Promise.resolve(service.token);
       });
+      // @ts-ignore private property; ok for testing
       service.token = undefined;
 
       mockAxios.mockResolvedValue({});
@@ -352,12 +364,16 @@ describe('PortainerService', () => {
     let originalFunction;
 
     beforeEach(() => {
+      // @ts-ignore private property; ok for testing
       service.token = token;
       originalFunction = service.getAuthToken;
       service.getAuthToken = jest.fn(() => {
+        // @ts-ignore private property; ok for testing
         service.token = token;
+        // @ts-ignore private property; ok for testing
         return Promise.resolve(service.token);
       });
+      // @ts-ignore private property; ok for testing
       service.token = undefined;
 
       mockAxios.mockResolvedValueOnce({});
@@ -396,12 +412,16 @@ describe('PortainerService', () => {
     const endpointId = Math.floor(Math.random() * 1000 + 1);
 
     beforeEach(() => {
+      // @ts-ignore private property; ok for testing
       service.token = token;
       originalAuthFunction = service.getAuthToken;
       service.getAuthToken = jest.fn(() => {
+        // @ts-ignore private property; ok for testing
         service.token = token;
+        // @ts-ignore private property; ok for testing
         return Promise.resolve(service.token);
       });
+      // @ts-ignore private property; ok for testing
       service.token = undefined;
 
       originalEndpointFunction = service.getEndpointId;
@@ -472,12 +492,16 @@ describe('PortainerService', () => {
     const endpointId = Math.floor(Math.random() * 100 + 1);
 
     beforeEach(() => {
+      // @ts-ignore private property; ok for testing
       service.token = token;
       originalAuthFunction = service.getAuthToken;
       service.getAuthToken = jest.fn(() => {
+        // @ts-ignore private property; ok for testing
         service.token = token;
+        // @ts-ignore private property; ok for testing
         return Promise.resolve(service.token);
       });
+      // @ts-ignore private property; ok for testing
       service.token = undefined;
 
       originalEndpointFunction = service.getEndpointId;

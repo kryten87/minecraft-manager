@@ -16,8 +16,7 @@ import { createStackName, objectToEnvValues } from '../../shared/utilities';
 
 @Injectable()
 export class PortainerService {
-  // @TODO make this private
-  public token: string | undefined = undefined;
+  private token: string | undefined = undefined;
 
   private baseUrl: string;
   private username: string;
@@ -95,7 +94,6 @@ export class PortainerService {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    // @TODO get additional information for the stacks
     return (response.data || [])
       .filter(
         (stack) =>
