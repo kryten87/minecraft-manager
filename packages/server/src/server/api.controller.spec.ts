@@ -1,15 +1,44 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ApiController } from './api.controller';
+import { PortainerService } from './services/portainer.service';
 
 describe('ApiController', () => {
   let controller: ApiController;
 
+  const stacks = [
+    {
+      id: 30,
+      stackName: 'mc-another-test',
+      status: 1,
+      name: 'mc-another-test',
+      description: 'my silly server',
+      owner: 'Evan',
+    },
+    {
+      id: 31,
+      stackName: 'mc-big-hairy-server',
+      status: 2,
+      name: 'mc-big-hairy-server',
+      description: 'another server',
+      owner: 'Maxwell',
+    },
+  ];
+
+  const mockPortainerService = {
+    listMinecraftStacks: jest.fn().mockResolvedValue(stacks),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ApiController],
+      providers: [
+        { provide: PortainerService, useValue: mockPortainerService },
+      ],
     }).compile();
 
     controller = module.get<ApiController>(ApiController);
+
+    mockPortainerService.listMinecraftStacks.mockClear();
   });
 
   it('should be defined', () => {
@@ -17,9 +46,15 @@ describe('ApiController', () => {
   });
 
   describe('list', () => {
-    it.todo('should call the portainer service list method');
+    it('should call the portainer service list method', async () => {
+      await controller.list();
+      expect(mockPortainerService.listMinecraftStacks).toBeCalledTimes(1);
+    });
 
-    it.todo('should return the expected values');
+    it('should return the expected values', async () => {
+      const res = await controller.list();
+      expect(res).toEqual(stacks);
+    });
   });
 
   describe('start', () => {
