@@ -1,4 +1,4 @@
-import { Controller, Get, Render } from '@nestjs/common';
+import { Controller, Get, Render, Query } from '@nestjs/common';
 import { AppService } from './app.service';
 import { PortainerService } from './services/portainer.service';
 
@@ -12,11 +12,19 @@ export class AppController {
   @Get()
   @Render('index')
   async home() {
-    // console.log('.... create');
-    // await this.portainerService.createStack({}, { name: `mc-test-10-01` });
-    // console.log('.... create finished');
     return {
       containers: await this.portainerService.listMinecraftStacks(),
     };
+  }
+
+  @Get('start')
+  async start(@Query('name') name: string): Promise<string> {
+    if (!name) {
+      throw new Error('must provide a name');
+    }
+    console.log('...create stack', name);
+    await this.portainerService.createStack({}, { name });
+    console.log('...create finished');
+    return 'stack started';
   }
 }
