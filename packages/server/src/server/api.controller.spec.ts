@@ -26,6 +26,7 @@ describe('ApiController', () => {
 
   const mockPortainerService = {
     listMinecraftStacks: jest.fn().mockResolvedValue(stacks),
+    startStack: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -39,6 +40,7 @@ describe('ApiController', () => {
     controller = module.get<ApiController>(ApiController);
 
     mockPortainerService.listMinecraftStacks.mockClear();
+    mockPortainerService.startStack.mockClear();
   });
 
   it('should be defined', () => {
@@ -58,7 +60,14 @@ describe('ApiController', () => {
   });
 
   describe('start', () => {
-    it.todo('should call the portainer service start method with the id');
+    it('should call the portainer service start method with the id', async () => {
+      const id = 42;
+
+      await controller.start(id);
+
+      expect(mockPortainerService.startStack).toBeCalledTimes(1);
+      expect(mockPortainerService.startStack).toBeCalledWith(id);
+    });
   });
 
   describe('stop', () => {
