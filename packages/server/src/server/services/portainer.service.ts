@@ -1,8 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import {
-  defaultMinecraftConfig,
   EnvironmentVariables,
-  MinecraftStackConfig,
   MinecraftStackMetadata,
   PortainerStackType,
   PortainerStatus,
@@ -19,6 +17,7 @@ import axios from 'axios';
 import { parse, stringify } from 'yaml';
 import { resolve } from 'path';
 import { createStackName, objectToEnvValues } from '../../shared/utilities';
+import { defaultMinecraftConfig, MinecraftStack } from '../dto/minecraft-stack';
 
 @Injectable()
 export class PortainerService {
@@ -205,7 +204,7 @@ export class PortainerService {
   }
 
   public async createStack(
-    stackConfiguration: Partial<MinecraftStackConfig>,
+    stackConfiguration: Partial<MinecraftStack>,
     metadata: Partial<MinecraftStackMetadata>,
   ): Promise<void> {
     const token = await this.getAuthToken();
