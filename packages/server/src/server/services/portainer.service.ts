@@ -5,7 +5,7 @@ import {
   PortainerStackType,
   PortainerStatus,
   Symbols,
-} from '../app.types';
+} from '../../shared/app.types';
 import {
   HttpException,
   HttpStatus,
