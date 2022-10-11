@@ -113,19 +113,28 @@ export class PortainerService {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    return (response.data || [])
-      .filter(
-        (stack) =>
-          /minecraft/i.test(stack.Name) ||
-          (stack.Env || []).find(
-            (env) => env.name === 'PORTAINER_MINECRAFT_STACK',
-          ),
-      )
-      .map((stack) => ({
-        id: stack.Id,
-        name: stack.Name,
-        status: stack.Status,
-      }));
+    let result = response.data || [];
+
+    result = result.filter((stack) =>
+      (stack.Env || []).find((env) => env.name === 'PORTAINER_MINECRAFT_STACK'),
+    );
+
+    result = result.map((stack) => ({
+      id: stack.Id,
+      stackName: stack.Name,
+      status: stack.Status,
+    }));
+
+    result = await Promise.all(
+      result.map(async (stack) => {
+        return {
+          ...stack,
+          ...(await this.getStackMetadata(stack.id)),
+        };
+      }),
+    );
+
+    return result;
   }
 
   public async startStack(stackId: number): Promise<void> {
