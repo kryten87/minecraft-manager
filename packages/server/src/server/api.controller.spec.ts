@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ApiController } from './api.controller';
 import { PortainerService } from './services/portainer.service';
+import { MinecraftGameMode } from './app.types';
 
 describe('ApiController', () => {
   let controller: ApiController;
@@ -28,6 +29,7 @@ describe('ApiController', () => {
     listMinecraftStacks: jest.fn().mockResolvedValue(stacks),
     startStack: jest.fn(),
     stopStack: jest.fn(),
+    createStack: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -43,6 +45,7 @@ describe('ApiController', () => {
     mockPortainerService.listMinecraftStacks.mockClear();
     mockPortainerService.startStack.mockClear();
     mockPortainerService.stopStack.mockClear();
+    mockPortainerService.createStack.mockClear();
   });
 
   it('should be defined', () => {
@@ -84,8 +87,25 @@ describe('ApiController', () => {
   });
 
   describe('create', () => {
-    it.todo(
-      'should call the portainer service create method with the parameters',
-    );
+    it('should call the portainer service create method with the parameters', async () => {
+      const config = {
+        spawnAnimals: false,
+        spawnMonsters: false,
+        spawnNpcs: false,
+        seed: '90210',
+        gameMode: MinecraftGameMode.creative,
+        pvp: true,
+      };
+      const metadata = {
+        name: 'My MC Server',
+        description: 'nothing to say',
+        owner: 'Nobody',
+      };
+
+      await controller.create({ ...config, ...metadata });
+
+      expect(mockPortainerService.createStack).toBeCalledTimes(1);
+      expect(mockPortainerService.createStack).toBeCalledWith(config, metadata);
+    });
   });
 });
