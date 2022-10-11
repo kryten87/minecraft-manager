@@ -230,12 +230,12 @@ describe('PortainerService', () => {
   });
 
   describe('listMinecraftStacks', () => {
-    let originalFunction;
+    let originalAuthFunction;
 
     beforeEach(() => {
       // @ts-ignore private property; ok for testing
       service.token = token;
-      originalFunction = service.getAuthToken;
+      originalAuthFunction = service.getAuthToken;
       service.getAuthToken = jest.fn(() => {
         // @ts-ignore private property; ok for testing
         service.token = token;
@@ -352,7 +352,7 @@ describe('PortainerService', () => {
     });
 
     afterEach(() => {
-      service.getAuthToken = originalFunction;
+      service.getAuthToken = originalAuthFunction;
     });
 
     it('should authenticate', async () => {
