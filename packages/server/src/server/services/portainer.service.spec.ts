@@ -56,26 +56,6 @@ describe('PortainerService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('createStackName', () => {
-    it('should return the expected value', () => {
-      [
-        { name: 'hello', expected: 'hello' },
-        { name: 'hello world', expected: 'hello_world' },
-        { name: 'hello  world       today', expected: 'hello_world_today' },
-        { name: 'hello#world', expected: 'helloworld' },
-        { name: '42-hello', expected: '42-hello' },
-        { name: 'someThing', expected: 'someThing' },
-        {
-          name: 'nice `~!@#$%^&*()+=[]{}|;:\'",.<>/? world',
-          expected: 'nice_world',
-        },
-      ].forEach(({ name, expected }) => {
-        const res = service.createStackName(name);
-        expect(res).toBe(expected);
-      });
-    });
-  });
-
   describe('getAuthToken', () => {
     describe('state = no token', () => {
       beforeEach(() => {
@@ -573,8 +553,8 @@ describe('PortainerService', () => {
             version: '3',
             'x-metadata': {
               name,
-              description: 'my silly server',
-              owner: 'Evan',
+              description: '',
+              owner: '',
             },
             services: {
               server: {

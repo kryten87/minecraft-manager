@@ -12,6 +12,7 @@ import { Inject, Injectable, Optional } from '@nestjs/common';
 import axios from 'axios';
 import { stringify } from 'yaml';
 import { resolve } from 'path';
+import { createStackName, objectToEnvValues } from '../../shared/utilities';
 
 @Injectable()
 export class PortainerService {
@@ -50,11 +51,6 @@ export class PortainerService {
       url.searchParams.append(key, `${params[key]}`);
     });
     return url.toString();
-  }
-
-  // @TODO make this private
-  public createStackName(name: string): string {
-    return `${name}`.replace(/[^a-zA-Z0-9-_ ]/g, '').replace(/[ ]+/g, '_');
   }
 
   public async getAuthToken(): Promise<string | undefined> {
@@ -182,23 +178,6 @@ export class PortainerService {
     });
   }
 
-  // @TODO move to utility functions
-  private camelCaseToSnakeCase(str: string): string {
-    return str
-      .split(/\.?(?=[A-Z])/)
-      .join('_')
-      .toLowerCase();
-  }
-
-  // @TODO move to utility functions
-  private objectToEnvValues(obj: Record<string, any>): Record<string, any> {
-    const res = {};
-    Object.keys(obj).forEach((key) => {
-      res[this.camelCaseToSnakeCase(key).toUpperCase()] = obj[key];
-    });
-    return res;
-  }
-
   public async createStack(
     stackConfiguration: Partial<MinecraftStackConfig>,
     metadata: Partial<MinecraftStackMetadata>,
@@ -216,36 +195,35 @@ export class PortainerService {
       ),
     );
 
-    // @TODO get a better name for the volume (ie. make sure it's valid)
-    const name = metadata?.name || `server-${Date.now()}`;
-    // @TODO build a path from the name
-    const path = name;
+    if (!metadata.name) {
+      // @TODO throw a 400 Bad Request error
+      throw new Error('name must be provided');
+    }
+    const name = createStackName(metadata.name);
+    const path = resolve(
+      this.configService.get<string>(
+        EnvironmentVariables.PORTAINER_VOLUME_PATH,
+      ),
+      name,
+    );
 
     const stackFileContent = {
       version: '3',
       'x-metadata': {
         name,
-        description: metadata.description || 'my silly server', // @TODO from request
-        owner: metadata.owner || 'Evan', // @TODO from request
+        description: metadata.description || '',
+        owner: metadata.owner || '',
       },
       services: {
         server: {
           image: 'itzg/minecraft-server:latest',
           environment: {
-            ...this.objectToEnvValues(defaultMinecraftConfig),
-            ...this.objectToEnvValues(stackConfiguration),
+            ...objectToEnvValues(defaultMinecraftConfig),
+            ...objectToEnvValues(stackConfiguration),
             EULA: true,
           },
           ports: ['25565:25565'],
-          volumes: [
-            '/etc/localtime:/etc/localtime:ro',
-            `${resolve(
-              this.configService.get<string>(
-                EnvironmentVariables.PORTAINER_VOLUME_PATH,
-              ),
-              path,
-            )}:/data`,
-          ],
+          volumes: ['/etc/localtime:/etc/localtime:ro', `${path}:/data`],
         },
       },
     };
@@ -253,7 +231,7 @@ export class PortainerService {
     const content = stringify(stackFileContent);
 
     const body = {
-      name, // @TODO get this from config
+      name,
       env: [{ name: 'PORTAINER_MINECRAFT_STACK', value: '1' }], // a flag to indicate this is a minecraft stack
       stackFileContent: content,
     };
