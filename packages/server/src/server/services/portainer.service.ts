@@ -71,6 +71,7 @@ export class PortainerService {
 
     let tokenIsValid = false;
     try {
+      // @TODO rewrite this as a retry on auth failure approach
       const response = await this.axiosLib({
         method: 'get',
         url: this.getUrl('/api/status'),
