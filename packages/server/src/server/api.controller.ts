@@ -1,11 +1,14 @@
 import { Controller, Get, Post } from '@nestjs/common';
+import { PortainerService } from './services/portainer.service';
 
 @Controller('api')
 export class ApiController {
+  constructor(private readonly portainerService: PortainerService) {}
+
   @Get('list')
   // @TYPES remove any
   public async list(): Promise<any> {
-    return '';
+    return this.portainerService.listMinecraftStacks();
   }
 
   @Get('start')
