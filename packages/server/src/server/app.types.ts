@@ -58,13 +58,13 @@ export interface MinecraftStackConfig {
   spawnAnimals: boolean; // (true)
   spawnMonsters: boolean; // (true)
   spawnNpcs: boolean; // spawn villagers (true)
-  spawnProtection: number; // set the area that non-ops can not edit (0 to disable) @TODO research this
+  spawnProtection: number; // set the area that non-ops can not edit (0 to disable) @FUTURE
   viewDistance: number; // set the amount of world data the server sends, in chunks (10)
   seed: string; // the level seed value (undefined)
   gameMode: MinecraftGameMode; // (survival)
   pvp: boolean; // (false)
   levelType: MinecraftLevelType; // (normal)
-  generatorSettings: string; // special world generator settings (undefined) @TODO future development
+  generatorSettings: string; // special world generator settings (undefined) @FUTURE
   level: string; // level save name (world)
   onlineMode: boolean; // check players against MC account DB (true)
   allowFlight: boolean; // allow flight, if the mode allows (true)
