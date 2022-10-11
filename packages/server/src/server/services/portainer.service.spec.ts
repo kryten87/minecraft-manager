@@ -163,7 +163,7 @@ describe('PortainerService', () => {
   });
 
   describe('getStackMetadata', () => {
-    let originalFunction;
+    let originalAuthFunction;
 
     const name = 'my-special-stack';
     const description = 'A detailed description';
@@ -172,7 +172,7 @@ describe('PortainerService', () => {
     beforeEach(() => {
       // @ts-ignore private property; ok for testing
       service.token = token;
-      originalFunction = service.getAuthToken;
+      originalAuthFunction = service.getAuthToken;
       service.getAuthToken = jest.fn(() => {
         // @ts-ignore private property; ok for testing
         service.token = token;
@@ -195,7 +195,7 @@ describe('PortainerService', () => {
     });
 
     afterEach(() => {
-      service.getAuthToken = originalFunction;
+      service.getAuthToken = originalAuthFunction;
     });
     it('should authenticate', async () => {
       const id = 1;
