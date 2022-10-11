@@ -52,6 +52,11 @@ export class PortainerService {
     return url.toString();
   }
 
+  // @TODO make this private
+  public createStackName(name: string): string {
+    return `${name}`.replace(/[^a-zA-Z0-9-_ ]/g, '').replace(/[ ]+/g, '_');
+  }
+
   public async getAuthToken(): Promise<string | undefined> {
     if (!this.token) {
       const response = await this.axiosLib({
