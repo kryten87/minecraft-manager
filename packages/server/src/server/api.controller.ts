@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { PortainerService } from './services/portainer.service';
-import { defaultMinecraftConfig, MinecraftStack } from './dto/minecraft-stack';
+import { MinecraftStack } from './dto/minecraft-stack';
 import { MinecraftStackMetadata } from './app.types';
 
 @Controller('api')
