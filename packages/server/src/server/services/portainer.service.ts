@@ -16,7 +16,7 @@ import {
   Optional,
 } from '@nestjs/common';
 import axios from 'axios';
-import { stringify } from 'yaml';
+import { parse, stringify } from 'yaml';
 import { resolve } from 'path';
 import { createStackName, objectToEnvValues } from '../../shared/utilities';
 
@@ -90,6 +90,19 @@ export class PortainerService {
     return this.token;
   }
 
+  // @TYPES remove this any
+  public async getStackMetadata(stackId: number): Promise<any> {
+    const token = await this.getAuthToken();
+    const response = await this.axiosLib({
+      method: 'get',
+      url: this.getUrl(`/api/stacks/${stackId}/file`),
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const metadata = parse(response.data.StackFileContent);
+    return metadata['x-metadata'];
+  }
+
+  // @TYPES remove this any
   public async listMinecraftStacks(): Promise<any[]> {
     // @TODO add name, description from docker-compose.yml metadata
     const token = await this.getAuthToken();
