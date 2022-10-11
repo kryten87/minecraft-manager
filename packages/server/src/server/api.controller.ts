@@ -1,5 +1,7 @@
-import { Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { PortainerService } from './services/portainer.service';
+import { defaultMinecraftConfig, MinecraftStack } from './dto/minecraft-stack';
+import { MinecraftStackMetadata } from './app.types';
 
 @Controller('api')
 export class ApiController {
@@ -26,7 +28,20 @@ export class ApiController {
   }
 
   @Post('create')
-  public async create(): Promise<any> {
+  public async create(
+    @Body() config: Partial<MinecraftStack & MinecraftStackMetadata>,
+  ): Promise<any> {
+    const metadata = {
+      name: config.name || undefined,
+      description: config.description || undefined,
+      owner: config.owner || undefined,
+    };
+    const revisedConfig = { ...config };
+    delete revisedConfig.name;
+    delete revisedConfig.description;
+    delete revisedConfig.owner;
+
+    await this.portainerService.createStack(revisedConfig, metadata);
     return { status: 'ok' };
   }
 }
