@@ -2,7 +2,7 @@ import {
   MinecraftDifficulty,
   MinecraftGameMode,
   MinecraftLevelType,
-} from '../../shared/app.types';
+} from '../../shared/types';
 
 export class MinecraftStack {
   motd: string; // message of the day

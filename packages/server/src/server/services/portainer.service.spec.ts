@@ -5,7 +5,7 @@ import {
   PortainerStackType,
   PortainerStatus,
   Symbols,
-} from '../../shared/app.types';
+} from '../../shared/types';
 import { PortainerService } from './portainer.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { stringify } from 'yaml';
