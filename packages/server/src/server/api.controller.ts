@@ -1,4 +1,4 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Controller, Get, Param, Post } from '@nestjs/common';
 import { PortainerService } from './services/portainer.service';
 
 @Controller('api')
@@ -11,20 +11,22 @@ export class ApiController {
     return this.portainerService.listMinecraftStacks();
   }
 
-  @Get('start')
+  @Get('start/:id')
   // @TYPES remove any
-  public async start(): Promise<any> {
-    return '';
+  public async start(@Param('id') id: number): Promise<any> {
+    await this.portainerService.startStack(id);
+    return { status: 'ok' };
   }
 
-  @Get('stop')
+  @Get('stop/:id')
   // @TYPES remove any
-  public async stop(): Promise<any> {
-    return '';
+  public async stop(@Param('id') id: number): Promise<any> {
+    await this.portainerService.stopStack(id);
+    return { status: 'ok' };
   }
 
   @Post('create')
   public async create(): Promise<any> {
-    return '';
+    return { status: 'ok' };
   }
 }
