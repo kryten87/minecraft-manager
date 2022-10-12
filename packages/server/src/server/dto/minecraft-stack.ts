@@ -2,9 +2,10 @@ import {
   MinecraftDifficulty,
   MinecraftGameMode,
   MinecraftLevelType,
+  MinecraftStackConfig,
 } from '../../shared/types';
 
-export class MinecraftStack {
+export class MinecraftStack implements MinecraftStackConfig {
   motd: string; // message of the day
   whitelist: string; // CSV list of allowed players (Kryten,MWThomas,EMThomas)
   ops: string; // CSV list of admins (Kryten,MWThomas,EMThomas)
@@ -13,7 +14,7 @@ export class MinecraftStack {
   announcePlayerAchievements: boolean; // a flag to allow/disallow announcements (true)
   enableCommandBlock: boolean; // a flag to allow/disallow command blocks (true)
   generateStructures: boolean; // generate villages/dungeons/etc. (true)
-  hardcode: boolean; // hardcode mode (false)
+  hardcore: boolean; // hardcode mode (false)
   snooperEnabled: boolean; // send data to snoop.minecraft.net (false)
   maxBuildHeight: number; // the max build height (256)
   maxTickTime: number; // max tick time before killing server (60000 ms)
@@ -33,28 +34,3 @@ export class MinecraftStack {
   serverName: string; // server name for online finding (unefined)
   difficulty: MinecraftDifficulty; // the world difficulty (normal)
 }
-
-export const defaultMinecraftConfig: Partial<MinecraftStack> = Object.freeze({
-  whitelist: 'Kryten,MWThomas,EMThomas',
-  ops: 'Kryten,MWThomas,EMThomas',
-  icon: 'http://findicons.com/files/icons/2438/minecraft/256/minecraft.png',
-  allowNether: true,
-  announcePlayerAchievements: true,
-  enableCommandBlock: true,
-  generateStructures: true,
-  hardcode: false,
-  snooperEnabled: false,
-  maxBuildHeight: 256,
-  maxTickTime: 60000,
-  spawnAnimals: true,
-  spawnMonsters: true,
-  spawnNpcs: true,
-  spawnProtection: 0,
-  viewDistance: 10,
-  gameMode: MinecraftGameMode.survival,
-  pvp: false,
-  levelType: MinecraftLevelType.normal,
-  onlineMode: true,
-  allowFlight: true,
-  difficulty: MinecraftDifficulty.normal,
-});
