@@ -31,21 +31,18 @@ export const StackList: FC = (props: Props) => {
 
   const onButtonClick = async (action: StackListAction, id: number) => {
     setIsProcessing(true);
-
     if (action === StackListAction.start) {
       await stopAllStacks(id);
       await startStack(id);
     } else if (action === StackListAction.stop) {
       await stopStack(id);
     }
-
     await refreshStacks();
-
     setIsProcessing(false);
   };
 
   return (
-    <table>
+    <table role="grid">
       <thead>
         <tr>
           <th>Name</th>
