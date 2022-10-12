@@ -208,7 +208,6 @@ export class PortainerService {
     stackConfiguration: Partial<MinecraftStack>,
     metadata: Partial<MinecraftStackMetadata>,
   ): Promise<void> {
-    // @TODO BUGFIX name should not be run through createStackName before inserting in docker-compose
     const token = await this.getAuthToken();
     const endpointId = await this.getEndpointId();
 
