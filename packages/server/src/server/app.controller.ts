@@ -17,6 +17,12 @@ export class AppController {
     };
   }
 
+  @Get('/create')
+  @Render('create')
+  async create() {
+    return {};
+  }
+
   @Get('start')
   async start(@Query('name') name: string): Promise<string> {
     if (!name) {
