@@ -5,6 +5,7 @@ import {
   PortainerStackType,
   PortainerStatus,
   Symbols,
+  defaultMinecraftConfig,
 } from '../../shared/types';
 import {
   HttpException,
@@ -17,7 +18,7 @@ import axios from 'axios';
 import { parse, stringify } from 'yaml';
 import { resolve } from 'path';
 import { createStackName, objectToEnvValues } from '../../shared/utilities';
-import { defaultMinecraftConfig, MinecraftStack } from '../dto/minecraft-stack';
+import { MinecraftStack } from '../dto/minecraft-stack';
 
 @Injectable()
 export class PortainerService {
