@@ -5,23 +5,57 @@ import { defaultMinecraftConfig, MinecraftStackMetadata, MinecraftStackConfig } 
 import { TextInput } from '../client/components/TextInput';
 import { Checkbox } from '../client/components/Checkbox';
 import { Select } from '../client/components/Select';
+import { object, string } from 'yup';
+
+const metadataValidator = object({
+  name: string().required('Please provide a name for your server'),
+  description: string(),
+  owner: string().oneOf(['Evan', 'Maxwell', 'Daddy']).required('Please select the server owner'),
+});
+
+const configValidator = object({
+  seed: string(),
+  gameMode: string().oneOf(['creative','survival','adventure','spectator']).required('Please select a game mode'),
+  levelType: string().oneOf(['minecraft:normal','minecraft:flat','minecraft:large_biomes','minecraft:amplified','minecraft:single_biome_surface']).required('Please select a level type'),
+  difficulty: string().oneOf(['0', '1', '2', '3']).required('Please select a difficulty'),
+});
+
 
 const Create: FC = (props: Record<string, any>) => {
+  const validate = (validator, values: Partial<MinecraftStackMetadata | MinecraftStackConfig>): any => {
+    try {
+      validator.validateSync(values, { abortEarly: false });
+      return {};
+    } catch (err) {
+      const updatedErrors = {};
+      err.inner.forEach((inner) => {
+        updatedErrors[inner.path] = inner.errors.join(', ').trim();
+      });
+      return updatedErrors;
+    }
+  };
+
+  const getAllErrors = (metadata, config) => ({
+    ...validate(metadataValidator, metadata),
+    ...validate(configValidator, config),
+  });
+
   const [config, setConfig] = useState({ ...defaultMinecraftConfig } as Partial<MinecraftStackConfig>);
   const [metadata, setMetadata] = useState({} as Partial<MinecraftStackMetadata>);
+  const [errors, setErrors] = useState({ ...validate(metadataValidator, metadata), ...validate(configValidator, config) });
 
   const onChangeMetadata = (key: string, value: string | boolean) => {
+    setErrors(getAllErrors({ ...metadata, [key]: value }, config));
     setMetadata({ ...metadata, [key]: value });
   };
 
   const onChangeConfig = (key: string, value: string | boolean) => {
+    const updatedConfig = { ...config, [key]: value };
+    setErrors(getAllErrors(metadata, updatedConfig));
     setConfig({ ...config, [key]: value });
   };
 
   const onClickSave = (event) => {
-    console.log('...meta', JSON.stringify(metadata, null, 2));
-    console.log('...config', JSON.stringify(config, null, 2));
-    // @TODO validate
     // @TODO call API
     // @TODO redirect back to "/"
   };
@@ -38,6 +72,7 @@ const Create: FC = (props: Record<string, any>) => {
           value={ metadata.name || '' }
           required
           onChange={ onChangeMetadata }
+          error={ errors.name }
         />
 
         <label htmlFor="description">
@@ -52,6 +87,7 @@ const Create: FC = (props: Record<string, any>) => {
           required
           nullMessage="Select an owner..."
           value={ metadata.owner }
+          error={ errors.owner }
           options={ [
             { label: 'Evan', value: 'Evan' },
             { label: 'Maxwell', value: 'Maxwell' },
@@ -77,6 +113,7 @@ const Create: FC = (props: Record<string, any>) => {
               required
               nullMessage="Select a game mode..."
               value={ config.gameMode }
+              error={ errors.gameMode }
               options={ [
                 { label: 'Creative', value: 'creative' },
                 { label: 'Survival', value: 'survival' },
@@ -92,6 +129,7 @@ const Create: FC = (props: Record<string, any>) => {
               required
               nullMessage="Select a level type..."
               value={ config.levelType }
+              error={ errors.levelType }
               options={ [
                 { label: 'Normal', value: 'minecraft:normal' },
                 { label: 'Flat', value: 'minecraft:flat' },
@@ -108,6 +146,7 @@ const Create: FC = (props: Record<string, any>) => {
               required
               nullMessage="Select a difficulty..."
               value={ config.difficulty }
+              error={ errors.difficulty }
               options={ [
                 { label: 'Peaceful', value: '0' },
                 { label: 'Easy', value: '1' },
@@ -134,7 +173,11 @@ const Create: FC = (props: Record<string, any>) => {
         </div>
 
         <br />
-        <button type="button" onClick={ onClickSave }>Save &amp; Start the Server!</button>
+        <button
+          type="button"
+          disabled={ !!Object.keys(errors).length }
+          onClick={ onClickSave }
+        >Save &amp; Start the Server!</button>
       </form>
     </div>
   );
