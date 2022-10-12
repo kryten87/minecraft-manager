@@ -231,12 +231,13 @@ export class PortainerService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const name = createStackName(metadata.name);
+    const name = metadata.name;
+    const safeName = createStackName(metadata.name);
     const path = resolve(
       this.configService.get<string>(
         EnvironmentVariables.PORTAINER_VOLUME_PATH,
       ),
-      name,
+      safeName,
     );
 
     const stackFileContent = {
@@ -263,7 +264,7 @@ export class PortainerService {
     const content = stringify(stackFileContent);
 
     const body = {
-      name,
+      name: safeName,
       env: [{ name: 'PORTAINER_MINECRAFT_STACK', value: '1' }], // a flag to indicate this is a minecraft stack
       stackFileContent: content,
     };
