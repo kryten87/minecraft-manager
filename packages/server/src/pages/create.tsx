@@ -6,6 +6,7 @@ import { TextInput } from '../client/components/TextInput';
 import { Checkbox } from '../client/components/Checkbox';
 import { Select } from '../client/components/Select';
 import { object, string } from 'yup';
+import { createStack } from '../client/libs/api';
 
 const metadataValidator = object({
   name: string().required('Please provide a name for your server'),
@@ -40,24 +41,31 @@ const Create: FC = (props: Record<string, any>) => {
     ...validate(configValidator, config),
   });
 
+  const [saveIsDisabled, setSaveIsDisabled] = useState(false);
   const [config, setConfig] = useState({ ...defaultMinecraftConfig } as Partial<MinecraftStackConfig>);
   const [metadata, setMetadata] = useState({} as Partial<MinecraftStackMetadata>);
   const [errors, setErrors] = useState({ ...validate(metadataValidator, metadata), ...validate(configValidator, config) });
 
   const onChangeMetadata = (key: string, value: string | boolean) => {
-    setErrors(getAllErrors({ ...metadata, [key]: value }, config));
+    const updatedErrors = getAllErrors({ ...metadata, [key]: value }, config);
+    setSaveIsDisabled(!!Object.keys(updatedErrors).length);
+    setErrors(updatedErrors);
     setMetadata({ ...metadata, [key]: value });
   };
 
   const onChangeConfig = (key: string, value: string | boolean) => {
     const updatedConfig = { ...config, [key]: value };
-    setErrors(getAllErrors(metadata, updatedConfig));
+    const updatedErrors = getAllErrors(metadata, updatedConfig);
+    setSaveIsDisabled(!!Object.keys(updatedErrors).length);
+    setErrors(updatedErrors);
     setConfig({ ...config, [key]: value });
   };
 
-  const onClickSave = (event) => {
-    // @TODO call API
-    // @TODO redirect back to "/"
+  const onClickSave = async () => {
+    setSaveIsDisabled(true);
+    await createStack(config, metadata);
+    setSaveIsDisabled(false);
+    location.href = "/";
   };
 
   return (
@@ -175,7 +183,7 @@ const Create: FC = (props: Record<string, any>) => {
         <br />
         <button
           type="button"
-          disabled={ !!Object.keys(errors).length }
+          disabled={ saveIsDisabled }
           onClick={ onClickSave }
         >Save &amp; Start the Server!</button>
       </form>
