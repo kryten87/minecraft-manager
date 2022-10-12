@@ -46,3 +46,8 @@ export enum PortainerStackType {
   swarm = 1,
   compose = 2,
 }
+
+export enum StackListAction {
+  start = 'start',
+  stop = 'stop',
+}
