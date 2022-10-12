@@ -10,6 +10,7 @@ import { PortainerService } from './portainer.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { stringify } from 'yaml';
 import { resolve } from 'path';
+import { createStackName } from '../../shared/utilities';
 
 describe('PortainerService', () => {
   let service: PortainerService;
@@ -651,7 +652,7 @@ describe('PortainerService', () => {
     });
 
     it('should make the correct request (no args -> default values)', async () => {
-      const name = `server-${Date.now()}`;
+      const name = `Server ${Date.now()}`;
       await service.createStack({}, { name });
 
       expect(mockAxios).toBeCalledTimes(1);
@@ -663,7 +664,7 @@ describe('PortainerService', () => {
           'Content-Type': 'application/json',
         },
         data: JSON.stringify({
-          name,
+          name: createStackName(name),
           env: [{ name: 'PORTAINER_MINECRAFT_STACK', value: '1' }],
           stackFileContent: stringify({
             version: '3',
@@ -703,7 +704,7 @@ describe('PortainerService', () => {
                 ports: ['25565:25565'],
                 volumes: [
                   '/etc/localtime:/etc/localtime:ro',
-                  `${resolve(volumePath, name)}:/data`,
+                  `${resolve(volumePath, createStackName(name))}:/data`,
                 ],
               },
             },
@@ -713,7 +714,7 @@ describe('PortainerService', () => {
     });
 
     it('should make the correct request (some args provided)', async () => {
-      const name = `server-${Date.now()}`;
+      const name = `Server ${Date.now()}`;
       await service.createStack(
         {
           icon: 'http://findicons.com/files/icons/2438/minecraft/256/minecraft.png',
@@ -738,7 +739,7 @@ describe('PortainerService', () => {
           'Content-Type': 'application/json',
         },
         data: JSON.stringify({
-          name,
+          name: createStackName(name),
           env: [{ name: 'PORTAINER_MINECRAFT_STACK', value: '1' }],
           stackFileContent: stringify({
             version: '3',
@@ -778,7 +779,7 @@ describe('PortainerService', () => {
                 ports: ['25565:25565'],
                 volumes: [
                   '/etc/localtime:/etc/localtime:ro',
-                  `${resolve(volumePath, name)}:/data`,
+                  `${resolve(volumePath, createStackName(name))}:/data`,
                 ],
               },
             },
