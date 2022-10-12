@@ -1,5 +1,9 @@
 import axios from 'axios';
-import { PortainerStatus } from '../../shared/types';
+import {
+  MinecraftStackMetadata,
+  MinecraftStackConfig,
+  PortainerStatus,
+} from '../../shared/types';
 
 export const startStack = (id: number) => axios.get(`/api/start/${id}`);
 
@@ -15,3 +19,10 @@ export const stopAllStacks = (stacks: any[]) =>
   );
 
 export const getStacks = () => axios.get('/api/list');
+
+export const createStack = (
+  config: Partial<MinecraftStackConfig>,
+  metadata: Partial<MinecraftStackMetadata>,
+) => {
+  return axios.post('/api/create', { ...config, ...metadata }, {});
+};
