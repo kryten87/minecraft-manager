@@ -1,7 +1,6 @@
-import { FC, useEffect, useState } from 'react';
-import { GetServerSideProps } from 'next';
+import { FC, useState } from 'react';
 import { PortainerStatus, StackListAction } from '../../shared/types';
-import axios from 'axios';
+import { startStack, stopStack, stopAllStacks, getStacks } from '../libs/api';
 
 interface Props {
   stacks: any[];
@@ -14,13 +13,6 @@ export const StackList: FC = (props: Props) => {
   const [stacks, setStacks] = useState(props.stacks || []);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const startStack = (id: number) => axios.get(`/api/start/${id}`);
-  const stopStack = (id: number) => axios.get(`/api/stop/${id}`);
-  const stopAllStacks = () => Promise.all(
-    stacks.map((stack) => stack.status === PortainerStatus.active ? stopStack(stack.id) : Promise.resolve())
-  );
-  const getStacks = () => axios.get('/api/list');
-
   const refreshStacks = async () => {
     setIsProcessing(true);
     const { data } = await getStacks();
@@ -32,7 +24,7 @@ export const StackList: FC = (props: Props) => {
   const onButtonClick = async (action: StackListAction, id: number) => {
     setIsProcessing(true);
     if (action === StackListAction.start) {
-      await stopAllStacks(id);
+      await stopAllStacks(stacks);
       await startStack(id);
     } else if (action === StackListAction.stop) {
       await stopStack(id);
