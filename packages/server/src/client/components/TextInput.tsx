@@ -6,6 +6,7 @@ interface TextInputProps {
   placeholder: string;
   value: string;
   required: boolean;
+  error: string;
   onChange: (key: string, value: string) => any;
 };
 
@@ -19,6 +20,7 @@ export const TextInput: FC = (props: TextInputProps) => (
       placeholder={ props.placeholder }
       value={ props.value }
       required={ !!props.required }
+      aria-invalid={ props.error ? 'true' : 'false' }
       onChange={ (event) => props.onChange(props.name, event.currentTarget.value) }
     />
   </label>
