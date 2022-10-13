@@ -1,7 +1,9 @@
 import { ConfigService } from '@nestjs/config';
 import {
+  createStackName,
   EnvironmentVariables,
   MinecraftStackMetadata,
+  objectToEnvValues,
   PortainerStackType,
   PortainerStatus,
   Symbols,
@@ -17,7 +19,6 @@ import {
 import axios from 'axios';
 import { parse, stringify } from 'yaml';
 import { resolve } from 'path';
-import { createStackName, objectToEnvValues } from '../../shared/utilities';
 import { MinecraftStack } from '../dto/minecraft-stack';
 
 @Injectable()

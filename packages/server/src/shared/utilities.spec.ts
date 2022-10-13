@@ -1,4 +1,4 @@
-import { createStackName } from './utilities';
+import { createStackName } from '@minecraft-manager/shared';
 
 describe('createStackName', () => {
   it('should return the expected value', () => {

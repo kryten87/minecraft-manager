@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { ConfigService } from '@nestjs/config';
 import {
+  createStackName,
   EnvironmentVariables,
   PortainerStackType,
   PortainerStatus,
@@ -10,7 +11,6 @@ import { PortainerService } from './portainer.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { stringify } from 'yaml';
 import { resolve } from 'path';
-import { createStackName } from '../../shared/utilities';
 
 describe('PortainerService', () => {
   let service: PortainerService;
