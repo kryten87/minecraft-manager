@@ -7,7 +7,7 @@ interface Props {
   onStackRefresh: (stacks: any[]) => void;
 }
 
-export const StackList: FC = (props: Props) => {
+export const StackList: FC<Props> = (props: Props) => {
   const { onStackRefresh } = props;
 
   const [stacks, setStacks] = useState(props.stacks || []);

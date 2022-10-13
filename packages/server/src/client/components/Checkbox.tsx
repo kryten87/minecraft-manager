@@ -8,7 +8,7 @@ interface CheckboxProps {
   onChange: (key: string, value: boolean) => any;
 };
 
-export const Checkbox: FC = (props: CheckboxProps) => (
+export const Checkbox: FC<CheckboxProps> = (props: CheckboxProps) => (
   <label htmlFor={ props.name }>
     <input
       type="checkbox"

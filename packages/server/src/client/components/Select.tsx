@@ -4,14 +4,14 @@ interface SelectProps {
   name: string;
   label: string;
   value: string;
-  required: boolean;
+  required?: boolean;
   nullMessage: string;
-  error: string;
+  error?: string;
   options: { label: string; value: string; }[];
   onChange: (key: string, value: string) => any;
 };
 
-export const Select: FC = (props: SelectProps) => (
+export const Select: FC<SelectProps> = (props: SelectProps) => (
   <>
     <label htmlFor={ props.name }>{ props.label }</label>
     <select

@@ -5,12 +5,12 @@ interface TextInputProps {
   label: string;
   placeholder: string;
   value: string;
-  required: boolean;
-  error: string;
+  required?: boolean;
+  error?: string;
   onChange: (key: string, value: string) => any;
 };
 
-export const TextInput: FC = (props: TextInputProps) => (
+export const TextInput: FC<TextInputProps> = (props: TextInputProps) => (
   <label htmlFor={ props.name }>
     { props.label }
     <input
