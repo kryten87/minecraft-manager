@@ -6,7 +6,7 @@ import {
   PortainerStatus,
   Symbols,
   defaultMinecraftConfig,
-} from '../../shared/types';
+} from '@minecraft-manager/shared';
 import {
   HttpException,
   HttpStatus,

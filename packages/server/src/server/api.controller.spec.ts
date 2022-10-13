@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ApiController } from './api.controller';
 import { PortainerService } from './services/portainer.service';
-import { MinecraftGameMode } from '../shared/types';
+import { MinecraftGameMode } from '@minecraft-manager/shared';
 
 describe('ApiController', () => {
   let controller: ApiController;

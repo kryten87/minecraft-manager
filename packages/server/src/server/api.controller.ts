@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { PortainerService } from './services/portainer.service';
 import { MinecraftStack } from './dto/minecraft-stack';
-import { MinecraftStackMetadata } from '../shared/types';
+import { MinecraftStackMetadata } from '@minecraft-manager/shared';
 
 @Controller('api')
 export class ApiController {

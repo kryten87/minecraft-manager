@@ -1,5 +1,5 @@
 import { FC, useState } from 'react';
-import { PortainerStatus, StackListAction } from '../../shared/types';
+import { PortainerStatus, StackListAction } from '@minecraft-manager/shared';
 import { startStack, stopStack, stopAllStacks, getStacks } from '../libs/api';
 
 interface Props {

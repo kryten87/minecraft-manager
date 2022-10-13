@@ -1,7 +1,7 @@
 import { FC, useState } from 'react';
 import '@picocss/pico/css/pico.css';
 import { GetServerSideProps } from 'next';
-import { defaultMinecraftConfig, MinecraftStackMetadata, MinecraftStackConfig } from '../shared/types';
+import { defaultMinecraftConfig, MinecraftStackMetadata, MinecraftStackConfig } from '@minecraft-manager/shared';
 import { TextInput } from '../client/components/TextInput';
 import { Checkbox } from '../client/components/Checkbox';
 import { Select } from '../client/components/Select';

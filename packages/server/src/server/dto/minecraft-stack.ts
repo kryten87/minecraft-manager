@@ -3,7 +3,7 @@ import {
   MinecraftGameMode,
   MinecraftLevelType,
   MinecraftStackConfig,
-} from '../../shared/types';
+} from '@minecraft-manager/shared';
 
 export class MinecraftStack implements MinecraftStackConfig {
   motd: string; // message of the day

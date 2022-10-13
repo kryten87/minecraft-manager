@@ -3,7 +3,7 @@ import {
   MinecraftStackMetadata,
   MinecraftStackConfig,
   PortainerStatus,
-} from '../../shared/types';
+} from '@minecraft-manager/shared';
 
 export const startStack = (id: number) => axios.get(`/api/start/${id}`);
 
