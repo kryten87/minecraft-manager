@@ -1,7 +1,7 @@
 {
   "name": "@minecraft-manager/shared",
   "version": "0.3.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
     "build": "rimraf dist && tsc"
