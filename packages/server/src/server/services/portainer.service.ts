@@ -155,15 +155,6 @@ export class PortainerService {
     });
   }
 
-  public async stopStack(stackId: number): Promise<void> {
-    const token = await this.getAuthToken();
-    await this.axiosLib({
-      method: 'post',
-      url: this.getUrl(`/api/stacks/${stackId}/stop`),
-      headers: { Authorization: `Bearer ${token}` },
-    });
-  }
-
   public async getEndpointId(): Promise<number> {
     const token = await this.getAuthToken();
     const response = await this.axiosLib({
