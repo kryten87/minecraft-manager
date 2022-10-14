@@ -4,7 +4,7 @@ interface CheckboxProps {
   name: string;
   label: string;
   value: boolean;
-  error: string;
+  error?: string;
   onChange: (key: string, value: boolean) => any;
 };
 
