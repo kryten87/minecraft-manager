@@ -1,30 +1,33 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { PortainerStatus, StackListAction } from '@minecraft-manager/shared';
 import { startStack, stopStack, stopAllStacks, getStacks } from '../libs/api';
 
 interface Props {
-  stacks: any[];
-  onStackRefresh: (stacks: any[]) => void;
 }
 
 export const StackList: FC<Props> = (props: Props) => {
-  const { onStackRefresh } = props;
-
-  const [stacks, setStacks] = useState(props.stacks || []);
+  const [stacks, setStacks] = useState(undefined as any[] | undefined);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    if (stacks === undefined) {
+      getStacks().then(({ data }) => {
+        setStacks(data);
+      });
+    }
+  });
 
   const refreshStacks = async () => {
     setIsProcessing(true);
     const { data } = await getStacks();
     setStacks(data);
-    onStackRefresh(data);
     setIsProcessing(false);
   };
 
   const onButtonClick = async (action: StackListAction, id: number) => {
     setIsProcessing(true);
     if (action === StackListAction.start) {
-      await stopAllStacks(stacks);
+      await stopAllStacks(stacks || []);
       await startStack(id);
     } else if (action === StackListAction.stop) {
       await stopStack(id);
@@ -44,7 +47,7 @@ export const StackList: FC<Props> = (props: Props) => {
         </tr>
       </thead>
       <tbody>
-        { stacks.map((stack) => (
+        { (stacks || []).map((stack) => (
           <tr key={ `stack-${stack.id}` }>
             <td>{ stack.name }</td>
             <td>{ stack.status === PortainerStatus.active ? (<kbd>Active</kbd>) : 'Inactive' }</td>
