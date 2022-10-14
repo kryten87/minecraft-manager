@@ -42,7 +42,7 @@ export const Create: FC = (props: Record<string, any>) => {
     ...validate(configValidator, config),
   });
 
-  const [saveIsDisabled, setSaveIsDisabled] = useState(false);
+  const [saveIsDisabled, setSaveIsDisabled] = useState(true);
   const [config, setConfig] = useState({ ...defaultMinecraftConfig } as Partial<MinecraftStackConfig>);
   const [metadata, setMetadata] = useState({} as Partial<MinecraftStackMetadata>);
   const [errors, setErrors] = useState({ ...validate(metadataValidator, metadata), ...validate(configValidator, config) });
@@ -71,10 +71,8 @@ export const Create: FC = (props: Record<string, any>) => {
   };
 
   return (
-    <div className="container">
-      <h1>Servers</h1>
+    <>
       <form>
-
         <TextInput
           name="name"
           label="Name"
@@ -189,6 +187,6 @@ export const Create: FC = (props: Record<string, any>) => {
           onClick={ onClickSave }
         >Save &amp; Start the Server!</button>
       </form>
-    </div>
+    </>
   );
 };
