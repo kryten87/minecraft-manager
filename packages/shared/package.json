@@ -1,0 +1,14 @@
+{
+  "name": "@minecraft-manager/shared",
+  "version": "0.3.0",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "rimraf dist && tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^18.8.5",
+    "rimraf": "^3.0.2",
+    "typescript": "4.7.4"
+  }
+}
