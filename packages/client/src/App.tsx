@@ -1,32 +1,32 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Link,
-} from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Create } from './pages/Create';
 import { List } from './pages/List';
+import { NavButton } from './components//NavButton';
 
 function App() {
   return (
-    <Router>
-      <div>
-        <nav>
-          <ul>
-            <li><Link to="/">List</Link></li>
-            <li><Link to="/create">Create</Link></li>
-          </ul>
-        </nav>
-      </div>
-
-      <Routes>
-        <Route path="" element={ <List /> }></Route>
-        <Route path="create" element={ <Create /> }></Route>
-      </Routes>
-    </Router>
+    <BrowserRouter>
+      <div className="container" style={{ marginTop: '2em' }}>
+        <div className="grid">
+          <div><h1>Minecraft Servers</h1></div>
+          <div>
+            <NavButton
+              labels={[
+                { when: '/', label: 'Add New...', path: 'create' },
+                { when: '/create', label: 'Cancel', path: '' },
+              ]}
+              style={{ float: 'right' }}
+            />
+          </div>
+        </div>
+        <Routes>
+          <Route path="" element={ <List /> }></Route>
+          <Route path="create" element={ <Create /> }></Route>
+        </Routes>
+      </div>`
+    </BrowserRouter>
   );
 }
 
