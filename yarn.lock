@@ -2915,9 +2915,9 @@
   dependencies:
     esquery "^1.0.1"
 
-"@picocss/pico@^1.5.5":
+"@picocss/pico@^1.5.5", "@picocss/pico@^1.5.6":
   version "1.5.6"
-  resolved "https://registry.npmjs.org/@picocss/pico/-/pico-1.5.6.tgz"
+  resolved "https://registry.yarnpkg.com/@picocss/pico/-/pico-1.5.6.tgz#82a2253e8dc12657f1a7de4e68c01cdc74f798b7"
   integrity sha512-9R+OdtMuHijKa7AQKBrng/1Q/Cd3BnEigYJXmOxI10Eka2qGGDa4b0hua8UeYu01BTtAiO70K7CQuHffU4YXGA==
 
 "@pmmmwh/react-refresh-webpack-plugin@^0.5.3":
@@ -13563,7 +13563,7 @@ yocto-queue@^0.1.0:
 
 yup@^0.32.11:
   version "0.32.11"
-  resolved "https://registry.npmjs.org/yup/-/yup-0.32.11.tgz"
+  resolved "https://registry.yarnpkg.com/yup/-/yup-0.32.11.tgz#d67fb83eefa4698607982e63f7ca4c5ed3cf18c5"
   integrity sha512-Z2Fe1bn+eLstG8DRR6FTavGD+MeAwyfmouhHsIUgaADz8jvFKbO/fXc2trJKZg+5EBjh4gGm3iU/t3onKlXHIg==
   dependencies:
     "@babel/runtime" "^7.15.4"
