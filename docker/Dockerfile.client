@@ -4,4 +4,4 @@ COPY docker/nginx.conf /etc/nginx/nginx.conf
 
 WORKDIR /www
 
-COPY build /www
+COPY ./packages/client/build /www
