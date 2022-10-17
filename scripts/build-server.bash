@@ -16,5 +16,5 @@ docker build \
 docker tag "$IMAGE_NAME:latest" "$IMAGE_NAME:$VERSION"
 
 echo -e "\nPushing image $IMAGE_NAME:$VERSION"
-# docker push "$IMAGE_NAME:$VERSION"
-# docker push "$IMAGE_NAME:latest"
+docker push "$IMAGE_NAME:$VERSION"
+docker push "$IMAGE_NAME:latest"
