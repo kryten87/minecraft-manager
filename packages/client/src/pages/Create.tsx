@@ -6,6 +6,7 @@ import { Checkbox } from '../components/Checkbox';
 import { Select } from '../components/Select';
 import { object, string, ValidationError } from 'yup';
 import { createStack } from '../libs/api';
+import { useNavigate } from 'react-router-dom';
 
 const metadataValidator = object({
   name: string().required('Please provide a name for your server'),
@@ -24,6 +25,8 @@ type MetadataValidator = typeof metadataValidator;
 type ConfigValidator = typeof configValidator;
 
 export const Create: FC = (props: Record<string, any>) => {
+  const navigate = useNavigate();
+
   const validate = (validator: MetadataValidator | ConfigValidator, values: Partial<MinecraftStackMetadata | MinecraftStackConfig>): any => {
     try {
       validator.validateSync(values, { abortEarly: false });
@@ -66,8 +69,7 @@ export const Create: FC = (props: Record<string, any>) => {
     setSaveIsDisabled(true);
     await createStack(config, metadata);
     setSaveIsDisabled(false);
-    // @TODO add router-friendly redirect
-    // location.href = "/";
+    navigate('/');
   };
 
   return (

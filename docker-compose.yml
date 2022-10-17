@@ -1,0 +1,15 @@
+version: "3.2"
+
+services:
+
+  client:
+    image: registry.gitlab.com/dave137/minecraft-manager/client:latest
+    ports:
+      - 8080:80
+    depends_on:
+      - api
+
+  api:
+    image: registry.gitlab.com/dave137/minecraft-manager/server:latest
+    env_file:
+      - ./packages/server/.env

@@ -4,8 +4,12 @@
   "workspaces": [
     "packages/*"
   ],
+  "scripts": {
+    "build:server": "/bin/bash ./scripts/build-server.bash",
+    "bump": "/bin/bash ./scripts/bump-version.bash"
+  },
   "devDependencies": {
     "lerna": "^6.0.0"
   },
-  "version": "0.4.0"
+  "version": "0.5.0"
 }

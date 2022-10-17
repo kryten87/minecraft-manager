@@ -1,6 +1,6 @@
 {
   "name": "@minecraft-manager/client",
-  "version": "0.1.0",
+  "version": "0.5.0",
   "private": true,
   "proxy": "http://localhost:3001",
   "dependencies": {
@@ -25,7 +25,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "build:docker": "/bin/bash ./scripts/docker-build.bash"
   },
   "eslintConfig": {
     "extends": [

@@ -49,7 +49,12 @@ export const StackList: FC<Props> = (props: Props) => {
       <tbody>
         { (stacks || []).map((stack) => (
           <tr key={ `stack-${stack.id}` }>
-            <td>{ stack.name }</td>
+            <td>
+              <strong>{ stack.name }</strong>
+              { (stack.description || '').split('\n').map((line: string) => (
+                <p style={{ marginBottom: '0.2em' }}><small style={{ color: '#888' }}>{ line }</small></p>
+              )) }
+            </td>
             <td>{ stack.status === PortainerStatus.active ? (<kbd>Active</kbd>) : 'Inactive' }</td>
             <td>{ stack.owner }</td>
             <td>
