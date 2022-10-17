@@ -25,7 +25,7 @@ function App() {
           <Route path="" element={ <List /> }></Route>
           <Route path="create" element={ <Create /> }></Route>
         </Routes>
-      </div>`
+      </div>
     </BrowserRouter>
   );
 }
