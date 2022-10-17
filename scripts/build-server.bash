@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IMAGE_NAME=registry.gitlab.com/minecraft-manager/server
+IMAGE_NAME=registry.gitlab.com/dave137/minecraft-manager/server
 
 # get the version from package.json
 VERSION=$(node -e "console.log(JSON.parse(require('fs').readFileSync('./packages/server/package.json').toString()).version);")
