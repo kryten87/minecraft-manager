@@ -5,7 +5,8 @@
     "packages/*"
   ],
   "scripts": {
-    "build:server": "/bin/bash ./scripts/build-server.bash"
+    "build:server": "/bin/bash ./scripts/build-server.bash",
+    "bump": "/bin/bash ./scripts/bump-version.bash"
   },
   "devDependencies": {
     "lerna": "^6.0.0"
