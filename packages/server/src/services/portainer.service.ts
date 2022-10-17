@@ -14,6 +14,7 @@ import {
   HttpStatus,
   Inject,
   Injectable,
+  Logger,
   Optional,
 } from '@nestjs/common';
 import axios from 'axios';
@@ -23,6 +24,8 @@ import { MinecraftStack } from '../dto/minecraft-stack';
 
 @Injectable()
 export class PortainerService {
+  private readonly logger = new Logger(PortainerService.name);
+
   private token: string | undefined = undefined;
 
   private baseUrl: string;
@@ -33,7 +36,9 @@ export class PortainerService {
     @Optional() @Inject(Symbols.Axios) private readonly axiosLib: typeof axios,
     private readonly configService: ConfigService,
   ) {
+    this.logger.debug('initializing service');
     if (!this.axiosLib) {
+      this.logger.verbose('use Axios package');
       this.axiosLib = axios;
     }
 
@@ -46,21 +51,29 @@ export class PortainerService {
     this.password = this.configService.get<string>(
       EnvironmentVariables.PORTAINER_PASSWORD,
     );
+    this.logger.verbose(`got configuration: base URL='${this.baseUrl}'`);
   }
 
   private getUrl(
     path: string,
     params: Record<string, string | number> = {},
   ): string {
+    this.logger.debug(
+      `constructing URL; path='${path}', params='${JSON.stringify(params)}'`,
+    );
     const url = new URL(path, this.baseUrl);
     Object.keys(params).forEach((key) => {
       url.searchParams.append(key, `${params[key]}`);
     });
-    return url.toString();
+    const result = url.toString();
+    this.logger.verbose(`calculated URL '${result}'`);
+    return result;
   }
 
   public async getAuthToken(): Promise<string | undefined> {
+    this.logger.debug('getting auth token');
     if (!this.token) {
+      this.logger.verbose('logging in to API');
       const response = await this.axiosLib({
         method: 'post',
         url: this.getUrl('/api/auth'),
@@ -73,6 +86,7 @@ export class PortainerService {
     let tokenIsValid = false;
     try {
       // @TODO rewrite this as a retry on auth failure approach
+      this.logger.verbose('attempting status check for auth token');
       const response = await this.axiosLib({
         method: 'get',
         url: this.getUrl('/api/status'),
@@ -80,20 +94,27 @@ export class PortainerService {
       });
       tokenIsValid = response.status === 200;
       if (!tokenIsValid) {
-        this.token = response?.data?.jwt;
+        this.logger.verbose('token is invalid; retrying');
+        this.token = undefined;
+        return this.getAuthToken();
       }
     } catch (err) {
+      this.logger.warn('got HTTP error on auth token request');
       if (!/status code 401/i.test(err.message)) {
+        this.logger.error(`HTTP error in getAuthToken: ${err.message}`, err);
         throw err;
       }
+      this.logger.verbose('token is invalid; retrying');
       this.token = undefined;
       return this.getAuthToken();
     }
+    this.logger.verbose('got auth token');
     return this.token;
   }
 
   // @TYPES remove this any
   public async getStackMetadata(stackId: number): Promise<any> {
+    this.logger.debug(`getting stack metadata id='${stackId}'`);
     const token = await this.getAuthToken();
     const response = await this.axiosLib({
       method: 'get',
@@ -101,11 +122,13 @@ export class PortainerService {
       headers: { Authorization: `Bearer ${token}` },
     });
     const metadata = parse(response.data.StackFileContent);
+    this.logger.verbose('returning stack metadata');
     return metadata['x-metadata'];
   }
 
   // @TYPES remove this any
   public async listMinecraftStacks(): Promise<any[]> {
+    this.logger.debug('getting minecraft stacks');
     const token = await this.getAuthToken();
 
     const response = await this.axiosLib({
@@ -116,16 +139,19 @@ export class PortainerService {
 
     let result = response.data || [];
 
+    this.logger.verbose('filtering non-minecraft stacks');
     result = result.filter((stack) =>
       (stack.Env || []).find((env) => env.name === 'PORTAINER_MINECRAFT_STACK'),
     );
 
+    this.logger.verbose('extracting relevant details');
     result = result.map((stack) => ({
       id: stack.Id,
       stackName: stack.Name,
       status: stack.Status,
     }));
 
+    this.logger.verbose('querying for stack metadata');
     result = await Promise.all(
       result.map(async (stack) => {
         return {
@@ -135,11 +161,14 @@ export class PortainerService {
       }),
     );
 
+    this.logger.verbose('returning list');
     return result;
   }
 
   public async startStack(stackId: number): Promise<void> {
+    this.logger.debug(`starting stack id='${stackId}'`);
     const token = await this.getAuthToken();
+    this.logger.verbose('making request to start stack');
     await this.axiosLib({
       method: 'post',
       url: this.getUrl(`/api/stacks/${stackId}/start`),
@@ -148,7 +177,9 @@ export class PortainerService {
   }
 
   public async stopStack(stackId: number): Promise<void> {
+    this.logger.debug(`stopping stack id='${stackId}'`);
     const token = await this.getAuthToken();
+    this.logger.verbose('making request to stop stack');
     await this.axiosLib({
       method: 'post',
       url: this.getUrl(`/api/stacks/${stackId}/stop`),
@@ -157,7 +188,9 @@ export class PortainerService {
   }
 
   public async getEndpointId(): Promise<number> {
+    this.logger.debug('getting Portainer endpoint ID');
     const token = await this.getAuthToken();
+    this.logger.verbose(`making request to get endpoint`);
     const response = await this.axiosLib({
       method: 'get',
       url: this.getUrl('/api/endpoints'),
@@ -166,12 +199,17 @@ export class PortainerService {
         'Content-Type': 'application/json',
       },
     });
-    return response.data[0].Id;
+    const result = response.data[0].Id;
+    this.logger.verbose(`got endpoint ID '${result}'`);
+    return result;
   }
 
   public async createVolume(name: string, dirName: string): Promise<void> {
+    this.logger.debug(`creating volume name='${name}', dir='${dirName}'`);
     const token = await this.getAuthToken();
+    this.logger.verbose('getting endpoint ID');
     const endpointId = await this.getEndpointId();
+    this.logger.verbose('making request to create volume');
     await this.axiosLib({
       method: 'post',
       url: this.getUrl(`/api/endpoints/${endpointId}/docker/volumes/create`),
@@ -200,11 +238,15 @@ export class PortainerService {
     stackConfiguration: Partial<MinecraftStack>,
     metadata: Partial<MinecraftStackMetadata>,
   ): Promise<void> {
+    this.logger.debug(`creating stack name='${metadata.name}'`);
     const token = await this.getAuthToken();
+    this.logger.verbose('getting endpoint ID');
     const endpointId = await this.getEndpointId();
 
     // get minecraft stacks & stop any running ones
+    this.logger.verbose('getting list of stacks');
     const stacks = await this.listMinecraftStacks();
+    this.logger.verbose('stopping any running stacks');
     await Promise.all(
       stacks.map((stack) =>
         stack.status === PortainerStatus.active
@@ -214,6 +256,7 @@ export class PortainerService {
     );
 
     if (!metadata.name) {
+      this.logger.error('no name provided, throwing BAD REQUEST error');
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,
@@ -231,6 +274,7 @@ export class PortainerService {
       safeName,
     );
 
+    this.logger.verbose('building stack content');
     const stackFileContent = {
       version: '3',
       'x-metadata': {
@@ -266,6 +310,7 @@ export class PortainerService {
       endpointId,
     });
 
+    this.logger.verbose('making request to start stack');
     await this.axiosLib({
       method: 'post',
       url,
