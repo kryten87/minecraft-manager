@@ -89,7 +89,7 @@ export class PortainerService {
       this.logger.verbose('attempting status check for auth token');
       const response = await this.axiosLib({
         method: 'get',
-        url: this.getUrl('/api/status'),
+        url: this.getUrl('/api/users'),
         headers: { Authorization: `Bearer ${this.token}` },
       });
       tokenIsValid = response.status === 200;
