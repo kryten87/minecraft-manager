@@ -109,7 +109,7 @@ describe('PortainerService', () => {
         expect(mockAxios).toBeCalledTimes(1);
         expect(mockAxios).toBeCalledWith({
           method: 'get',
-          url: `${baseUrl}/api/status`,
+          url: `${baseUrl}/api/users`,
           headers: { Authorization: `Bearer ${token}` },
         });
       });
@@ -147,7 +147,7 @@ describe('PortainerService', () => {
         expect(mockAxios).toBeCalledTimes(2);
         expect(mockAxios).toBeCalledWith({
           method: 'get',
-          url: `${baseUrl}/api/status`,
+          url: `${baseUrl}/api/users`,
           headers: { Authorization: `Bearer ${token}` },
         });
         expect(mockAxios).toBeCalledWith({
