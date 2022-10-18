@@ -5,6 +5,8 @@
     "packages/*"
   ],
   "scripts": {
+    "build": "yarn build:client && yarn build:server",
+    "build:client": "/bin/bash ./scripts/build-client.bash",
     "build:server": "/bin/bash ./scripts/build-server.bash",
     "bump": "/bin/bash ./scripts/bump-version.bash"
   },
